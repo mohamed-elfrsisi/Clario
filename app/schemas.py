@@ -53,3 +53,14 @@ class FuzzyMatchOut(BaseModel):
     preferred_skill: Optional[str] = None
     matched_to: str
     similarity: float
+
+
+class BulletRewriteIn(BaseModel):
+    bullets: list[str]
+
+
+class BulletRewriteOut(BaseModel):
+    original: str
+    rewritten: str
+    placeholders_added: int
+    needs_review: bool
