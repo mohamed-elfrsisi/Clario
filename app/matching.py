@@ -41,7 +41,14 @@ FUZZY_THRESHOLD = 0.88
 
 def _normalize(skill: str) -> str:
     cleaned = " ".join(skill.strip().lower().split())  # collapse internal whitespace too
-    return SYNONYMS.get(cleaned, cleaned)
+    if cleaned in SYNONYMS:
+        return SYNONYMS[cleaned]
+    # Fall back to matching on the leading token, so version-suffixed
+    # variants like "Postgres 15" or "Python 3" still resolve to their
+    # canonical synonym instead of only being caught (or missed) by the
+    # fuzzy fallback.
+    first_word = cleaned.split(" ", 1)[0] if cleaned else cleaned
+    return SYNONYMS.get(first_word, cleaned)
 
 
 def _best_fuzzy_match(target: str, candidates: list[str]) -> tuple[str | None, float]:

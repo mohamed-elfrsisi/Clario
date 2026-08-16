@@ -1,5 +1,5 @@
 from typing import Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class DocumentOut(BaseModel):
@@ -10,8 +10,7 @@ class DocumentOut(BaseModel):
     parse_ability_score: Optional[float]
     parse_risk_flags: list[str]
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class OpportunityIn(BaseModel):
@@ -27,8 +26,7 @@ class OpportunityOut(BaseModel):
     region: Optional[str]
     role_type: Optional[str]
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class AnalysisRequest(BaseModel):
@@ -44,8 +42,7 @@ class AnalysisOut(BaseModel):
     parse_ability_score: Optional[float]
     report_text: Optional[str]
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class FuzzyMatchOut(BaseModel):
