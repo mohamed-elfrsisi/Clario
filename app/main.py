@@ -8,7 +8,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import Base, engine
-from app.routers import documents, opportunities, analysis, bullets
+from app.routers import documents, opportunities, analysis, bullets, draft, profile
 from app import models  # noqa: F401 -- ensures models are registered before create_all
 
 
@@ -46,3 +46,5 @@ app.include_router(documents.router)
 app.include_router(opportunities.router)
 app.include_router(analysis.router)
 app.include_router(bullets.router)
+app.include_router(draft.router)
+app.include_router(profile.router)

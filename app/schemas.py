@@ -61,3 +61,43 @@ class BulletRewriteOut(BaseModel):
     rewritten: str
     placeholders_added: int
     needs_review: bool
+
+
+class BuildDraftIn(BaseModel):
+    activities: list[str]
+
+
+class BuildDraftOut(BaseModel):
+    sections: dict
+    all_skills_detected: list[str]
+    is_thin: bool
+    note: Optional[str] = None
+    status: Optional[str] = None
+
+
+class ExperienceEntry(BaseModel):
+    title: str
+    description: str
+    confirmed_metrics: list[str] = []
+
+
+class ProfileIn(BaseModel):
+    master_skills: list[str]
+    master_experience: list[ExperienceEntry] = []
+
+
+class ProfileOut(BaseModel):
+    profile_id: str
+    master_skills: list[str]
+    master_experience: list[dict]
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class TailorProfileIn(BaseModel):
+    opportunity_id: str
+
+
+class TailorProfileOut(BaseModel):
+    tailored_skills: list[str]
+    tailored_experience: list[dict]
