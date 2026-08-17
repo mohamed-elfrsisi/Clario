@@ -11,10 +11,19 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
+# Copy and install backend dependencies first (for better layer caching)
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Copy application code
 COPY app ./app
+
+# Copy documentation
+COPY docs ./docs
+
+# Copy frontend requirements (for reference; Streamlit runs separately)
+COPY frontend/requirements.txt ./frontend/
+COPY frontend/streamlit_app.py ./frontend/
 
 # SQLite file lives here if DATABASE_URL isn't overridden to Postgres —
 # mounted as a volume in docker-compose.yml so data survives container restarts.
@@ -22,4 +31,5 @@ RUN mkdir -p /app/data
 
 EXPOSE 8000
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Default: run the FastAPI backend
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--log-level", "info"]
