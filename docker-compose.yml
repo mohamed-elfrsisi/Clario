@@ -1,0 +1,30 @@
+services:
+  clario:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      # Default: SQLite file persisted via the volume below. To use Postgres
+      # instead, uncomment the postgres service and change this to:
+      # DATABASE_URL=postgresql://clario:clario@postgres:5432/clario
+      - DATABASE_URL=sqlite:////app/data/clario.db
+    volumes:
+      - clario_data:/app/data
+    restart: unless-stopped
+
+  # Uncomment to run against Postgres instead of SQLite. If you do, also
+  # uncomment `depends_on` below and switch DATABASE_URL above.
+  # postgres:
+  #   image: postgres:16-alpine
+  #   environment:
+  #     - POSTGRES_USER=clario
+  #     - POSTGRES_PASSWORD=clario
+  #     - POSTGRES_DB=clario
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   ports:
+  #     - "5432:5432"
+
+volumes:
+  clario_data:
+  # postgres_data:
