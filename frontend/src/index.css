@@ -104,11 +104,15 @@ button:focus-visible {
   }
 
   .card {
-    @apply bg-white rounded-xl border border-gray-200 shadow-sm;
+    @apply bg-white rounded-lg border border-slate-200;
   }
 
   .card-hover {
-    @apply card hover:shadow-md hover:border-gray-300 transition-all duration-150;
+    @apply card hover:border-slate-300 transition-colors duration-150;
+  }
+
+  .panel {
+    @apply border border-slate-200 bg-white;
   }
 
   .badge {

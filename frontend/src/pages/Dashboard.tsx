@@ -1,171 +1,176 @@
 import { Link } from 'react-router-dom'
-import { Sparkles, FileText, Briefcase, Users, ArrowRight, Zap } from 'lucide-react'
+import { FileText, Briefcase, Upload, Plus, Search, Pencil } from 'lucide-react'
+import { useAuth } from '../auth/context'
 import { useDashboardData } from '../hooks/useDashboardData'
+import { pageDescriptions } from '../config/navigation'
+import { Table, TableHead, TableHeaderCell, TableBody, TableRow, TableCell } from '../components/ui/Table'
+import { Badge } from '../components/ui/Badge'
+import { EmptyState } from '../components/ui/EmptyState'
 
 export function DashboardPage() {
+  const { user } = useAuth()
   const data = useDashboardData()
+  const firstName = user?.email?.split('@')[0] ?? 'there'
 
-  const stats = [
-    {
-      label: 'Documents',
-      value: data.documentsCount,
-      icon: FileText,
-      color: 'text-blue-600',
-      bg: 'bg-blue-50',
-      description: 'Uploaded resumes and documents',
-    },
-    {
-      label: 'Opportunities',
-      value: data.opportunitiesCount,
-      icon: Briefcase,
-      color: 'text-amber-600',
-      bg: 'bg-amber-50',
-      description: 'Jobs and opportunities saved',
-    },
-    {
-      label: 'Analyses',
-      value: data.analysesCount,
-      icon: Users,
-      color: 'text-emerald-600',
-      bg: 'bg-emerald-50',
-      description: 'Resume match analyses completed',
-    },
+  const metrics = [
+    { label: 'Documents', value: data.documentsCount },
+    { label: 'Opportunities', value: data.opportunitiesCount },
+    { label: 'Analyses', value: data.analysesCount },
   ]
 
   return (
-    <div className="p-4 md:p-6 lg:p-8">
-      {/* Header */}
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
-          <p className="mt-1 text-sm text-slate-500">
-            Welcome back. Here is what is happening with your account.
-          </p>
-        </div>
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 shadow-md">
-          <Sparkles className="h-5 w-5 text-white" />
-        </div>
+    <div className="space-y-6">
+      {/* Welcome */}
+      <div>
+        <p className="text-xs font-medium uppercase tracking-wider text-slate-400">Overview</p>
+        <h2 className="mt-1 text-lg font-semibold text-slate-900">
+          Welcome back, {firstName}
+        </h2>
+        <p className="mt-0.5 text-sm text-slate-500">{pageDescriptions['/dashboard']}</p>
       </div>
 
-      {/* Stats */}
-      <div className="mb-8 grid gap-4 md:grid-cols-3">
-        {stats.map((stat) => (
-          <div key={stat.label} className="card p-5">
-            <div className="flex items-start justify-between">
-              <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${stat.bg}`}>
-                <stat.icon className={`h-5 w-5 ${stat.color}`} />
-              </div>
-              <span className="text-2xl font-bold text-slate-900">{stat.value}</span>
-            </div>
-            <p className="mt-3 text-sm font-medium text-slate-700">{stat.label}</p>
-            <p className="text-xs text-slate-400">{stat.description}</p>
+      {/* Metrics */}
+      <div className="grid grid-cols-3 divide-x divide-slate-200 border border-slate-200 bg-white">
+        {metrics.map((m) => (
+          <div key={m.label} className="px-4 py-3">
+            <p className="text-[11px] font-medium uppercase tracking-wider text-slate-400">{m.label}</p>
+            <p className="mt-1 text-2xl font-semibold tabular-nums text-slate-900">
+              {data.loading ? '—' : m.value}
+            </p>
           </div>
         ))}
       </div>
 
+      {/* Recent documents */}
+      <section>
+        <div className="mb-2 flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-slate-900">Recent Documents</h3>
+          <Link to="/documents" className="text-xs font-medium text-indigo-600 hover:text-indigo-700">
+            View all
+          </Link>
+        </div>
+        {data.recentDocuments.length > 0 ? (
+          <Table>
+            <TableHead>
+              <TableHeaderCell>Document</TableHeaderCell>
+              <TableHeaderCell>Status</TableHeaderCell>
+              <TableHeaderCell>Parse Score</TableHeaderCell>
+              <TableHeaderCell className="text-right">Actions</TableHeaderCell>
+            </TableHead>
+            <TableBody>
+              {data.recentDocuments.map((doc) => (
+                <TableRow key={doc.document_id}>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-slate-400" />
+                      <span className="font-medium text-slate-900">{doc.filename || 'Untitled'}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={doc.doc_type ? 'success' : 'neutral'}>
+                      {doc.doc_type || 'Pending'}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="tabular-nums">
+                    {doc.parse_ability_score != null
+                      ? `${(doc.parse_ability_score * 100).toFixed(0)}%`
+                      : '—'}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Link to="/documents" className="text-xs font-medium text-indigo-600 hover:text-indigo-700">
+                      Open
+                    </Link>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        ) : (
+          !data.loading && (
+            <div className="border border-slate-200 bg-white">
+              <EmptyState
+                icon={FileText}
+                title="No documents yet"
+                description="Upload your first resume to get started."
+                action={
+                  <Link to="/documents" className="btn btn-primary text-xs">
+                    Upload document
+                  </Link>
+                }
+              />
+            </div>
+          )
+        )}
+      </section>
+
+      {/* Recent opportunities */}
+      <section>
+        <div className="mb-2 flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-slate-900">Recent Opportunities</h3>
+          <Link to="/opportunities" className="text-xs font-medium text-indigo-600 hover:text-indigo-700">
+            View all
+          </Link>
+        </div>
+        {data.recentOpportunities.length > 0 ? (
+          <Table>
+            <TableHead>
+              <TableHeaderCell>Opportunity</TableHeaderCell>
+              <TableHeaderCell>Type</TableHeaderCell>
+              <TableHeaderCell>Region</TableHeaderCell>
+              <TableHeaderCell>Status</TableHeaderCell>
+            </TableHead>
+            <TableBody>
+              {data.recentOpportunities.map((opp) => (
+                <TableRow key={opp.opportunity_id}>
+                  <TableCell className="font-medium text-slate-900">
+                    {opp.title || 'Untitled'}
+                  </TableCell>
+                  <TableCell>{opp.role_type || '—'}</TableCell>
+                  <TableCell>{opp.region || '—'}</TableCell>
+                  <TableCell><Badge variant="info">Active</Badge></TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        ) : (
+          !data.loading && (
+            <div className="border border-slate-200 bg-white">
+              <EmptyState
+                icon={Briefcase}
+                title="No opportunities yet"
+                description="Add a job description to analyze your match."
+                action={
+                  <Link to="/opportunities" className="btn btn-secondary text-xs">
+                    Add opportunity
+                  </Link>
+                }
+              />
+            </div>
+          )
+        )}
+      </section>
+
       {/* Quick actions */}
-      <div className="mb-8">
-        <h2 className="mb-4 text-lg font-semibold text-slate-900">Quick actions</h2>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <section>
+        <h3 className="mb-2 text-sm font-semibold text-slate-900">Quick Actions</h3>
+        <div className="flex flex-wrap gap-2">
           {[
-            { label: 'Upload document', href: '/documents', icon: FileText },
-            { label: 'Add opportunity', href: '/opportunities', icon: Briefcase },
-            { label: 'New analysis', href: '/analysis', icon: Zap },
-            { label: 'Rewrite bullets', href: '/bullets', icon: ArrowRight },
+            { label: 'Upload Resume', to: '/documents', icon: Upload },
+            { label: 'Add Opportunity', to: '/opportunities', icon: Plus },
+            { label: 'Analyze Resume', to: '/analysis', icon: Search },
+            { label: 'Rewrite Bullet', to: '/bullets', icon: Pencil },
           ].map((action) => (
             <Link
-              key={action.href}
-              to={action.href}
-              className="card-hover p-4 flex items-center gap-3 text-slate-700 hover:text-slate-900"
+              key={action.to}
+              to={action.to}
+              className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
             >
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
-                <action.icon className="h-4 w-4" />
-              </div>
-              <span className="text-sm font-medium">{action.label}</span>
+              <action.icon className="h-3.5 w-3.5 text-slate-400" />
+              {action.label}
             </Link>
           ))}
         </div>
-      </div>
-
-      {/* Recent documents */}
-      {data.recentDocuments.length > 0 && (
-        <section className="mb-8">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-slate-900">Recent documents</h2>
-            <Link to="/documents" className="text-sm text-indigo-600 hover:text-indigo-700 font-medium">
-              View all
-            </Link>
-          </div>
-          <div className="card p-5">
-            <div className="space-y-3">
-              {data.recentDocuments.map((doc) => (
-                <div key={doc.document_id} className="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
-                  <div className="flex items-center gap-3">
-                    <FileText className="h-4 w-4 text-slate-400" />
-                    <div>
-                      <p className="text-sm font-medium text-slate-900">{doc.filename || 'Untitled document'}</p>
-                      <p className="text-xs text-slate-400">{doc.doc_type || 'Pending analysis'}</p>
-                    </div>
-                  </div>
-                  {doc.parse_ability_score !== null && (
-                    <span className="text-xs font-medium text-slate-500">
-                      Parse: {(doc.parse_ability_score * 100).toFixed(0)}%
-                    </span>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Recent opportunities */}
-      {data.recentOpportunities.length > 0 && (
-        <section className="mb-8">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-slate-900">Recent opportunities</h2>
-            <Link to="/opportunities" className="text-sm text-indigo-600 hover:text-indigo-700 font-medium">
-              View all
-            </Link>
-          </div>
-          <div className="card p-5">
-            <div className="space-y-3">
-              {data.recentOpportunities.map((opp) => (
-                <div key={opp.opportunity_id} className="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
-                  <div className="flex items-center gap-3">
-                    <Briefcase className="h-4 w-4 text-slate-400" />
-                    <div>
-                      <p className="text-sm font-medium text-slate-900">{opp.title || 'Untitled opportunity'}</p>
-                      <p className="text-xs text-slate-400">{opp.role_type || 'No role type'}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Empty state */}
-      {data.recentDocuments.length === 0 && data.recentOpportunities.length === 0 && (
-        <div className="card p-8 text-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 mx-auto mb-4">
-            <Sparkles className="h-6 w-6 text-slate-400" />
-          </div>
-          <h3 className="text-lg font-semibold text-slate-900 mb-1">Get started</h3>
-          <p className="text-sm text-slate-500 max-w-sm mx-auto mb-4">
-            Upload your first resume and add an opportunity to start analyzing your match.
-          </p>
-          <div className="flex justify-center gap-3">
-            <Link to="/documents" className="btn btn-primary">
-              Upload document
-            </Link>
-            <Link to="/opportunities" className="btn btn-secondary">
-              Add opportunity
-            </Link>
-          </div>
-        </div>
-      )}
+      </section>
     </div>
   )
 }

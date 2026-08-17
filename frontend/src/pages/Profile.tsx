@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react'
-import { Save, Sparkles, Trash2, Plus } from 'lucide-react'
+import { Save, Trash2, Plus, Wand2 } from 'lucide-react'
 import { api } from '../api/client'
+import type { Profile, TailorResult } from '../api/types'
 import { useToast } from '../hooks/useToast'
+import { pageDescriptions } from '../config/navigation'
+import { Badge } from '../components/ui/Badge'
 
 interface ExperienceEntry {
   title: string
@@ -11,14 +14,13 @@ interface ExperienceEntry {
 
 export function ProfilePage() {
   const { add } = useToast()
-  const [profile, setProfile] = useState<any>(null)
+  const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
-
   const [skills, setSkills] = useState('')
   const [experiences, setExperiences] = useState<ExperienceEntry[]>([])
   const [tailoring, setTailoring] = useState(false)
-  const [tailoredResult, setTailoredResult] = useState<any>(null)
+  const [tailoredResult, setTailoredResult] = useState<TailorResult | null>(null)
 
   const loadProfile = async () => {
     setLoading(true)
@@ -26,9 +28,9 @@ export function ProfilePage() {
       const res = await api.getProfile()
       setProfile(res.data)
       setSkills(res.data.master_skills?.join(', ') || '')
-      setExperiences(res.data.master_experience || [])
-    } catch (err: any) {
-      if (err.response?.status !== 404) {
+      setExperiences(res.data.master_experience as ExperienceEntry[] || [])
+    } catch (err: unknown) {
+      if ((err as { response?: { status?: number } }).response?.status !== 404) {
         add('error', 'Failed to load profile')
       }
     } finally {
@@ -39,6 +41,11 @@ export function ProfilePage() {
   useEffect(() => {
     loadProfile()
   }, [])
+
+  const skillCount = skills.split(',').map((s) => s.trim()).filter(Boolean).length
+  const completeness = profile
+    ? Math.min(100, Math.round((skillCount > 0 ? 40 : 0) + (experiences.length > 0 ? 40 : 0) + (profile.profile_id ? 20 : 0)))
+    : Math.min(100, Math.round((skillCount > 0 ? 50 : 0) + (experiences.length > 0 ? 50 : 0)))
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -56,8 +63,8 @@ export function ProfilePage() {
       })
       setProfile(res.data)
       add('success', 'Profile saved')
-    } catch (err: any) {
-      const detail = err.response?.data?.detail || 'Failed to save profile'
+    } catch (err: unknown) {
+      const detail = (err as { response?: { data?: { detail?: string } } }).response?.data?.detail || 'Failed to save profile'
       add('error', detail)
     } finally {
       setSaving(false)
@@ -77,8 +84,8 @@ export function ProfilePage() {
       const res = await api.tailorProfile(oppId)
       setTailoredResult(res.data)
       add('success', 'Profile tailored')
-    } catch (err: any) {
-      const detail = err.response?.data?.detail || 'Tailoring failed'
+    } catch (err: unknown) {
+      const detail = (err as { response?: { data?: { detail?: string } } }).response?.data?.detail || 'Tailoring failed'
       add('error', detail)
     } finally {
       setTailoring(false)
@@ -100,170 +107,144 @@ export function ProfilePage() {
   }
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 max-w-3xl">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">Profile</h1>
-        <p className="mt-1 text-sm text-slate-500">
-          Save your core skills and experience once, then tailor them per opportunity.
-        </p>
+    <div className="space-y-5">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-xs font-medium uppercase tracking-wider text-slate-400">Career Builder</p>
+          <h2 className="mt-1 text-lg font-semibold text-slate-900">Profile</h2>
+          <p className="mt-0.5 text-sm text-slate-500">{pageDescriptions['/profile']}</p>
+        </div>
+        {profile && (
+          <div className="text-right">
+            <p className="text-[11px] font-medium uppercase tracking-wider text-slate-400">Completeness</p>
+            <p className="text-lg font-semibold tabular-nums text-slate-900">{completeness}%</p>
+          </div>
+        )}
       </div>
 
-      {/* Save form */}
-      <div className="card p-5 mb-6">
-        <form onSubmit={handleSave} className="space-y-5">
-          <div>
-            <label className="label">Skills (comma-separated)</label>
-            <textarea
-              className="input min-h-[100px]"
-              placeholder="Python, JavaScript, SQL, React, Docker, AWS..."
-              value={skills}
-              onChange={(e) => setSkills(e.target.value)}
-            />
-            <p className="mt-1 text-xs text-slate-400">
-              {skills.split(',').filter((s) => s.trim()).length} skills detected
-            </p>
-          </div>
+      {loading ? (
+        <div className="flex items-center justify-center border border-slate-200 bg-white py-16">
+          <span className="h-5 w-5 animate-spin rounded-full border-2 border-slate-300 border-t-indigo-600" />
+        </div>
+      ) : (
+        <form onSubmit={handleSave} className="space-y-4">
+          {/* Skills section */}
+          <section className="border border-slate-200 bg-white">
+            <div className="border-b border-slate-100 px-4 py-2.5">
+              <h3 className="text-sm font-semibold text-slate-900">Skills</h3>
+              <p className="text-xs text-slate-400">Master skills used across all opportunities</p>
+            </div>
+            <div className="p-4">
+              <textarea
+                className="input min-h-[80px] font-mono text-sm"
+                placeholder="Python, JavaScript, SQL, React, Docker, AWS..."
+                value={skills}
+                onChange={(e) => setSkills(e.target.value)}
+              />
+              <p className="mt-1 text-xs text-slate-400">{skillCount} skills detected</p>
+            </div>
+          </section>
 
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="label mb-0">Experience</label>
-              <button
-                type="button"
-                onClick={addExperience}
-                className="btn btn-ghost text-xs"
-              >
+          {/* Experience section */}
+          <section className="border border-slate-200 bg-white">
+            <div className="flex items-center justify-between border-b border-slate-100 px-4 py-2.5">
+              <div>
+                <h3 className="text-sm font-semibold text-slate-900">Experience</h3>
+                <p className="text-xs text-slate-400">{experiences.length} entries</p>
+              </div>
+              <button type="button" onClick={addExperience} className="btn btn-ghost text-xs">
                 <Plus className="h-3.5 w-3.5" />
                 Add entry
               </button>
             </div>
-
-            <div className="space-y-3">
+            <div className="divide-y divide-slate-100">
               {experiences.map((exp, idx) => (
-                <div key={idx} className="card p-3 border border-slate-200">
-                  <div className="flex items-start justify-between gap-2 mb-2">
+                <div key={idx} className="p-4">
+                  <div className="flex items-start gap-2">
                     <input
                       className="input flex-1 text-sm"
-                      placeholder="Title"
+                      placeholder="Job title"
                       value={exp.title}
                       onChange={(e) => updateExperience(idx, 'title', e.target.value)}
                     />
                     <button
                       type="button"
                       onClick={() => removeExperience(idx)}
-                      className="text-slate-400 hover:text-red-600 p-1"
+                      className="p-2 text-slate-400 hover:text-red-600"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
                   </div>
                   <textarea
-                    className="input min-h-[60px] text-sm"
+                    className="input mt-2 min-h-[60px] text-sm"
                     placeholder="Description"
                     value={exp.description}
                     onChange={(e) => updateExperience(idx, 'description', e.target.value)}
                   />
                   <input
-                    className="input text-sm mt-2"
-                    placeholder="Confirmed metrics (comma-separated, e.g. 40% faster, 500 users)"
+                    className="input mt-2 text-sm"
+                    placeholder="Confirmed metrics (comma-separated)"
                     value={exp.confirmed_metrics.join(', ')}
-                    onChange={(e) => updateExperience(idx, 'confirmed_metrics', e.target.value.split(',').map((s) => s.trim()).filter(Boolean))}
+                    onChange={(e) =>
+                      updateExperience(
+                        idx,
+                        'confirmed_metrics',
+                        e.target.value.split(',').map((s) => s.trim()).filter(Boolean)
+                      )
+                    }
                   />
                 </div>
               ))}
               {experiences.length === 0 && (
-                <p className="text-sm text-slate-400 text-center py-4">
-                  No experience entries yet. Add one above.
+                <p className="px-4 py-6 text-center text-sm text-slate-400">
+                  No experience entries yet.
                 </p>
               )}
             </div>
-          </div>
+          </section>
 
-          <div className="flex items-center gap-3">
-            <button type="submit" disabled={saving || loading} className="btn btn-primary">
-              {saving ? (
-                <span className="flex items-center gap-2">
-                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                  Saving...
-                </span>
-              ) : (
-                <>
-                  <Save className="h-4 w-4" />
-                  {profile ? 'Update profile' : 'Create profile'}
-                </>
-              )}
+          <div className="flex items-center gap-2">
+            <button type="submit" disabled={saving} className="btn btn-primary text-xs">
+              <Save className="h-3.5 w-3.5" />
+              {saving ? 'Saving...' : profile ? 'Update profile' : 'Create profile'}
             </button>
+            {profile && (
+              <button type="button" onClick={handleTailor} disabled={tailoring} className="btn btn-secondary text-xs">
+                <Wand2 className="h-3.5 w-3.5" />
+                {tailoring ? 'Tailoring...' : 'Tailor to opportunity'}
+              </button>
+            )}
           </div>
         </form>
-      </div>
+      )}
 
-      {/* Tailoring */}
-      {profile && (
-        <div className="card p-5 mb-6">
-          <div className="flex items-center justify-between">
+      {tailoredResult && (
+        <section className="border border-slate-200 bg-white p-4">
+          <h3 className="mb-3 text-sm font-semibold text-slate-900">Tailored profile</h3>
+          <div className="space-y-3">
             <div>
-              <h3 className="text-sm font-semibold text-slate-900 mb-1">Tailor to opportunity</h3>
-              <p className="text-xs text-slate-400">Reorder skills and experience for a specific job</p>
+              <p className="mb-1.5 text-xs font-medium uppercase tracking-wider text-slate-400">Tailored skills</p>
+              <div className="flex flex-wrap gap-1.5">
+                {tailoredResult.tailored_skills.map((skill, i) => (
+                  <Badge key={i} variant="success">{skill}</Badge>
+                ))}
+              </div>
             </div>
-            <button
-              onClick={handleTailor}
-              disabled={tailoring}
-              className="btn btn-secondary"
-            >
-              {tailoring ? (
-                <span className="flex items-center gap-2">
-                  <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-slate-400 border-t-transparent" />
-                  Tailoring...
-                </span>
-              ) : (
-                <>
-                  <Sparkles className="h-3.5 w-3.5" />
-                  Tailor now
-                </>
-              )}
-            </button>
-          </div>
-
-          {tailoredResult && (
-            <div className="mt-4 space-y-3">
+            {tailoredResult.tailored_experience.length > 0 && (
               <div>
-                <p className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-2">Tailored skills</p>
-                <div className="flex flex-wrap gap-2">
-                  {tailoredResult.tailored_skills?.map((skill: string, i: number) => (
-                    <span key={i} className="badge badge-success">{skill}</span>
+                <p className="mb-1.5 text-xs font-medium uppercase tracking-wider text-slate-400">Tailored experience</p>
+                <div className="divide-y divide-slate-100 border border-slate-100">
+                  {tailoredResult.tailored_experience.map((exp, i) => (
+                    <div key={i} className="px-3 py-2">
+                      <p className="text-sm font-medium text-slate-900">{(exp as ExperienceEntry).title || 'Untitled'}</p>
+                      <p className="text-xs text-slate-500">{(exp as ExperienceEntry).description || ''}</p>
+                    </div>
                   ))}
                 </div>
               </div>
-              <div>
-                <p className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-2">Tailored experience</p>
-                {tailoredResult.tailored_experience?.length > 0 ? (
-                  <div className="space-y-2">
-                    {tailoredResult.tailored_experience.map((exp: any, i: number) => (
-                      <div key={i} className="text-sm p-2 bg-slate-50 rounded-lg">
-                        <p className="font-medium text-slate-900">{exp.title || 'Untitled'}</p>
-                        <p className="text-slate-500">{exp.description || ''}</p>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-sm text-slate-400">No experience to tailor</p>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Profile data display */}
-      {profile && (
-        <div className="card p-5">
-          <h3 className="text-sm font-semibold text-slate-900 mb-3">Current profile data</h3>
-          <div className="text-xs text-slate-500">
-            <p><span className="font-medium text-slate-700">Profile ID:</span> {profile.profile_id}</p>
-            <p><span className="font-medium text-slate-700">Skills:</span> {profile.master_skills?.join(', ') || 'None'}</p>
-            {profile.master_experience && profile.master_experience.length > 0 && (
-              <p><span className="font-medium text-slate-700">Experience entries:</span> {profile.master_experience.length}</p>
             )}
           </div>
-        </div>
+        </section>
       )}
     </div>
   )
