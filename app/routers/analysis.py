@@ -3,13 +3,17 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app import models, schemas, matching, local_extractor, report_generator
-from app.deps import get_or_create_demo_user
+from app.deps import get_current_user
 
 router = APIRouter(prefix="/analysis", tags=["analysis"])
 
 
 @router.post("", response_model=schemas.AnalysisOut)
-def run_analysis(payload: schemas.AnalysisRequest, db: Session = Depends(get_db)):
+def run_analysis(
+    payload: schemas.AnalysisRequest,
+    db: Session = Depends(get_db),
+    user: models.User = Depends(get_current_user),
+):
     """
     Full pipeline per Architecture §2.2 / FSD §1.8 FR-6/FR-9:
       1. Extract  (local, rule-based) -> skills/experience/requirements
@@ -19,13 +23,15 @@ def run_analysis(payload: schemas.AnalysisRequest, db: Session = Depends(get_db)
       3. Explain  (local, template)   -> strengths/gaps/recommendations
          grounded in step 2 (app/report_generator.py — no external API)
     """
-    user = get_or_create_demo_user(db)
-
-    doc = db.query(models.Document).filter(models.Document.id == payload.document_id).first()
+    doc = db.query(models.Document).filter(
+        models.Document.id == payload.document_id, models.Document.user_id == user.id
+    ).first()
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found.")
 
-    opp = db.query(models.Opportunity).filter(models.Opportunity.id == payload.opportunity_id).first()
+    opp = db.query(models.Opportunity).filter(
+        models.Opportunity.id == payload.opportunity_id, models.Opportunity.user_id == user.id
+    ).first()
     if not opp:
         raise HTTPException(status_code=404, detail="Opportunity not found.")
 
@@ -103,8 +109,14 @@ def run_analysis(payload: schemas.AnalysisRequest, db: Session = Depends(get_db)
 
 
 @router.get("/{analysis_id}", response_model=schemas.AnalysisOut)
-def get_analysis(analysis_id: str, db: Session = Depends(get_db)):
-    analysis = db.query(models.Analysis).filter(models.Analysis.id == analysis_id).first()
+def get_analysis(
+    analysis_id: str,
+    db: Session = Depends(get_db),
+    user: models.User = Depends(get_current_user),
+):
+    analysis = db.query(models.Analysis).filter(
+        models.Analysis.id == analysis_id, models.Analysis.user_id == user.id
+    ).first()
     if not analysis:
         raise HTTPException(status_code=404, detail="Analysis not found.")
 

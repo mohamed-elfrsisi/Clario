@@ -101,3 +101,21 @@ class TailorProfileIn(BaseModel):
 class TailorProfileOut(BaseModel):
     tailored_skills: list[str]
     tailored_experience: list[dict]
+
+
+class RegisterIn(BaseModel):
+    email: str
+    password: str
+    region: Optional[str] = None
+    field_of_study: Optional[str] = None
+
+
+class LoginIn(BaseModel):
+    email: str
+    password: str
+
+
+class TokenOut(BaseModel):
+    access_token: str
+    user_id: str
+    token_type: str = "bearer"

@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app import models, schemas, parsers
-from app.deps import get_or_create_demo_user
+from app.deps import get_current_user
 
 router = APIRouter(prefix="/documents", tags=["documents"])
 
@@ -12,8 +12,8 @@ router = APIRouter(prefix="/documents", tags=["documents"])
 async def upload_document(
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
+    user: models.User = Depends(get_current_user),
 ):
-    user = get_or_create_demo_user(db)
     file_bytes = await file.read()
 
     try:

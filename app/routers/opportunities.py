@@ -3,18 +3,20 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app import models, schemas
-from app.deps import get_or_create_demo_user
+from app.deps import get_current_user
 
 router = APIRouter(prefix="/opportunities", tags=["opportunities"])
 
 
 @router.post("", response_model=schemas.OpportunityOut)
-def create_opportunity(payload: schemas.OpportunityIn, db: Session = Depends(get_db)):
+def create_opportunity(
+    payload: schemas.OpportunityIn,
+    db: Session = Depends(get_db),
+    user: models.User = Depends(get_current_user),
+):
     if not payload.text or not payload.text.strip():
         # Per FSD §1.8: never guess requirements from empty/invalid input
         raise HTTPException(status_code=400, detail="Opportunity text cannot be empty.")
-
-    user = get_or_create_demo_user(db)
 
     opp = models.Opportunity(
         user_id=user.id,

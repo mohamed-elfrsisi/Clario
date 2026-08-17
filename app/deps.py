@@ -1,24 +1,35 @@
 """
-Temporary stand-in for authentication.
+Real bearer-token authentication, replacing the Sprint 1 demo-user stub.
 
-Sprint 1 has no auth system yet — every request is attributed to one
-demo user so the rest of the schema (User -> Document/Opportunity/Analysis)
-can be built and tested. Replace with real auth (JWT/session) before
-this goes anywhere beyond local development.
+Every request to a protected endpoint must send:
+    Authorization: Bearer <token>
+where <token> was issued by POST /auth/login or POST /auth/register.
 """
+from fastapi import Depends, HTTPException, Header
 from sqlalchemy.orm import Session
+
+from app.database import get_db
 from app import models
 
-DEMO_EMAIL = "demo@clario.local"
 
+def get_current_user(
+    authorization: str | None = Header(default=None),
+    db: Session = Depends(get_db),
+) -> models.User:
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(
+            status_code=401,
+            detail="Missing or malformed Authorization header. Expected: Bearer <token>.",
+        )
 
-def get_or_create_demo_user(db: Session) -> models.User:
-    user = db.query(models.User).filter(models.User.email == DEMO_EMAIL).first()
-    if user:
-        return user
+    token = authorization.removeprefix("Bearer ").strip()
+    auth_token = db.query(models.AuthToken).filter(models.AuthToken.token == token).first()
+    if not auth_token:
+        raise HTTPException(status_code=401, detail="Invalid or expired token.")
 
-    user = models.User(email=DEMO_EMAIL)
-    db.add(user)
-    db.commit()
-    db.refresh(user)
+    user = db.query(models.User).filter(models.User.id == auth_token.user_id).first()
+    if not user:
+        # Token exists but its user was deleted — treat as invalid, don't 500.
+        raise HTTPException(status_code=401, detail="Invalid or expired token.")
+
     return user

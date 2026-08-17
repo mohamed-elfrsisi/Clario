@@ -23,6 +23,7 @@ class User(Base):
 
     id = Column(String, primary_key=True, default=_uuid)
     email = Column(String, unique=True, nullable=False)
+    password_hash = Column(String, nullable=False)
     region = Column(String, nullable=True)
     field_of_study = Column(String, nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
@@ -31,6 +32,19 @@ class User(Base):
     documents = relationship("Document", back_populates="user")
     opportunities = relationship("Opportunity", back_populates="user")
     analyses = relationship("Analysis", back_populates="user")
+    tokens = relationship("AuthToken", back_populates="user")
+
+
+class AuthToken(Base):
+    """Opaque bearer token — simple session auth, no JWT library needed."""
+    __tablename__ = "auth_tokens"
+
+    id = Column(String, primary_key=True, default=_uuid)
+    token = Column(String, unique=True, nullable=False, index=True)
+    user_id = Column(String, ForeignKey("users.id"), nullable=False)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+    user = relationship("User", back_populates="tokens")
 
 
 class Profile(Base):

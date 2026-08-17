@@ -8,7 +8,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import Base, engine
-from app.routers import documents, opportunities, analysis, bullets, draft, profile
+from app.routers import documents, opportunities, analysis, bullets, draft, profile, auth
 from app import models  # noqa: F401 -- ensures models are registered before create_all
 
 
@@ -42,6 +42,7 @@ def health():
     return {"status": "ok"}
 
 
+app.include_router(auth.router)
 app.include_router(documents.router)
 app.include_router(opportunities.router)
 app.include_router(analysis.router)

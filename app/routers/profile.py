@@ -3,20 +3,22 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app import models, schemas, profile_tailor
-from app.deps import get_or_create_demo_user
+from app.deps import get_current_user
 from app.local_extractor import extract
 
 router = APIRouter(prefix="/profile", tags=["profile"])
 
 
 @router.post("", response_model=schemas.ProfileOut)
-def create_or_update_profile(payload: schemas.ProfileIn, db: Session = Depends(get_db)):
+def create_or_update_profile(
+    payload: schemas.ProfileIn,
+    db: Session = Depends(get_db),
+    user: models.User = Depends(get_current_user),
+):
     """
     FR-12 — stores the student's reusable master profile (skills +
     experience). One profile per user (1:1 per the ERD, Architecture §2.6).
     """
-    user = get_or_create_demo_user(db)
-
     profile = db.query(models.Profile).filter(models.Profile.user_id == user.id).first()
     experience_dicts = [e.model_dump() for e in payload.master_experience]
 
@@ -42,8 +44,10 @@ def create_or_update_profile(payload: schemas.ProfileIn, db: Session = Depends(g
 
 
 @router.get("", response_model=schemas.ProfileOut)
-def get_profile(db: Session = Depends(get_db)):
-    user = get_or_create_demo_user(db)
+def get_profile(
+    db: Session = Depends(get_db),
+    user: models.User = Depends(get_current_user),
+):
     profile = db.query(models.Profile).filter(models.Profile.user_id == user.id).first()
     if not profile:
         raise HTTPException(status_code=404, detail="No profile found. Create one with POST /profile first.")
@@ -56,19 +60,23 @@ def get_profile(db: Session = Depends(get_db)):
 
 
 @router.post("/tailor", response_model=schemas.TailorProfileOut)
-def tailor_profile(payload: schemas.TailorProfileIn, db: Session = Depends(get_db)):
+def tailor_profile(
+    payload: schemas.TailorProfileIn,
+    db: Session = Depends(get_db),
+    user: models.User = Depends(get_current_user),
+):
     """
     FR-12 — reorders (never invents) the stored profile's skills/experience
     to emphasize what a specific opportunity requires. Per BR-8, this is
     ordering/emphasis only.
     """
-    user = get_or_create_demo_user(db)
-
     profile = db.query(models.Profile).filter(models.Profile.user_id == user.id).first()
     if not profile:
         raise HTTPException(status_code=404, detail="No profile found. Create one with POST /profile first.")
 
-    opp = db.query(models.Opportunity).filter(models.Opportunity.id == payload.opportunity_id).first()
+    opp = db.query(models.Opportunity).filter(
+        models.Opportunity.id == payload.opportunity_id, models.Opportunity.user_id == user.id
+    ).first()
     if not opp:
         raise HTTPException(status_code=404, detail="Opportunity not found.")
 
