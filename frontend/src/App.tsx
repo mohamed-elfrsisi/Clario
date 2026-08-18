@@ -16,6 +16,7 @@ import { CareerProfilePage } from './pages/CareerProfile'
 import { CareerTargetPage } from './pages/CareerTarget'
 import { MyResumePage } from './pages/MyResume'
 import { ComingSoonPage } from './pages/ComingSoon'
+import { CareerAnalyticsPage } from './pages/CareerAnalytics'
 import { MockInterviewsPage } from './pages/MockInterviews'
 import { InterviewSetupPage } from './pages/InterviewSetup'
 import { InterviewSessionPage } from './pages/InterviewSession'
@@ -187,19 +188,20 @@ export default function App() {
             } />
 
             {/* Reserved product modules */}
-            {['/applications', '/career-analytics'].map((path) => (
-              <Route
-                key={path}
-                path={path}
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <ComingSoonPage />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-            ))}
+            <Route path="/applications" element={
+              <ProtectedRoute>
+                <Layout>
+                  <ComingSoonPage />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/career-analytics" element={
+              <ProtectedRoute>
+                <Layout>
+                  <CareerAnalyticsPage />
+                </Layout>
+              </ProtectedRoute>
+            } />
 
             {/* Default redirect */}
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
