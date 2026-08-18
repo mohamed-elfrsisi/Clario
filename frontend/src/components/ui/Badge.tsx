@@ -1,23 +1,27 @@
 import type { ReactNode } from 'react'
 
-type BadgeVariant = 'success' | 'warning' | 'error' | 'info' | 'neutral'
+export type BadgeVariant = 'success' | 'warning' | 'error' | 'info' | 'neutral' | 'accent'
 
-const variantClasses: Record<BadgeVariant, string> = {
-  success: 'bg-emerald-50 text-emerald-700 ring-emerald-600/20',
-  warning: 'bg-amber-50 text-amber-700 ring-amber-600/20',
-  error: 'bg-red-50 text-red-700 ring-red-600/20',
-  info: 'bg-blue-50 text-blue-700 ring-blue-600/20',
-  neutral: 'bg-slate-100 text-slate-600 ring-slate-500/10',
-}
-
-interface BadgeProps {
+export interface BadgeProps {
   variant?: BadgeVariant
   children: ReactNode
+  className?: string
 }
 
-export function Badge({ variant = 'neutral', children }: BadgeProps) {
+const variants: Record<BadgeVariant, string> = {
+  success: 'bg-[var(--color-success-bg)] text-[var(--color-success-text)] ring-[var(--color-success-border)]',
+  warning: 'bg-[var(--color-warning-bg)] text-[var(--color-warning-text)] ring-[var(--color-warning-border)]',
+  error: 'bg-[var(--color-error-bg)] text-[var(--color-error-text)] ring-[var(--color-error-border)]',
+  info: 'bg-[var(--color-info-bg)] text-[var(--color-info-text)] ring-[var(--color-info-border)]',
+  neutral: 'bg-[var(--color-neutral-bg)] text-[var(--color-text-secondary)] ring-[var(--color-border)]',
+  accent: 'bg-[var(--color-accent-soft)] text-[var(--color-accent-text)] ring-[var(--color-accent-border)]',
+}
+
+export function Badge({ variant = 'neutral', children, className = '' }: BadgeProps) {
   return (
-    <span className={`inline-flex items-center rounded px-1.5 py-0.5 text-[11px] font-medium ring-1 ring-inset ${variantClasses[variant]}`}>
+    <span
+      className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium leading-none ring-1 ring-inset ${variants[variant]} ${className}`}
+    >
       {children}
     </span>
   )

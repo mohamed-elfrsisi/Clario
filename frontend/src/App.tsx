@@ -12,6 +12,7 @@ import { AnalysisPage } from './pages/Analysis'
 import { BulletsPage } from './pages/Bullets'
 import { ProfilePage } from './pages/Profile'
 import { SettingsPage } from './pages/Settings'
+import { ComingSoonPage } from './pages/ComingSoon'
 import { useAuth } from './auth/context'
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
@@ -118,6 +119,28 @@ export default function App() {
                 </Layout>
               </ProtectedRoute>
             } />
+
+            {/* Phase 2 shell routes reserved for upcoming career modules */}
+            {[
+              '/resume',
+              '/career-profile',
+              '/career-target',
+              '/applications',
+              '/mock-interviews',
+              '/career-analytics',
+            ].map((path) => (
+              <Route
+                key={path}
+                path={path}
+                element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <ComingSoonPage />
+                    </Layout>
+                  </ProtectedRoute>
+                }
+              />
+            ))}
 
             {/* Default redirect */}
             <Route path="*" element={<Navigate to="/dashboard" replace />} />

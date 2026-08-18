@@ -1,18 +1,26 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: [
-    './index.html',
-    './src/**/*.{js,ts,jsx,tsx}',
-  ],
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
       colors: {
         clario: {
-          rail: '#1e1b4b',
-          'rail-hover': '#312e81',
-          surface: '#ffffff',
-          bg: '#f1f5f9',
+          bg: 'var(--color-bg)',
+          surface: 'var(--color-surface)',
+          accent: 'var(--color-accent)',
+          text: 'var(--color-text)',
+          muted: 'var(--color-text-muted)',
+          border: 'var(--color-border)',
         },
+      },
+      boxShadow: {
+        clario: 'var(--shadow-sm)',
+        'clario-md': 'var(--shadow-md)',
+        'clario-lg': 'var(--shadow-lg)',
+      },
+      borderRadius: {
+        clario: 'var(--radius-md)',
+        'clario-lg': 'var(--radius-lg)',
       },
     },
   },

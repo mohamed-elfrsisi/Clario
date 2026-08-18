@@ -12,22 +12,23 @@ export function AppShell({ children }: AppShellProps) {
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-100">
+    <div className="flex min-h-screen bg-[var(--color-bg)]">
       <PrimarySidebar />
 
       <SecondarySidebar
         collapsed={secondaryCollapsed}
-        onToggle={() => setSecondaryCollapsed(!secondaryCollapsed)}
+        onToggle={() => setSecondaryCollapsed((value) => !value)}
       />
 
-      {/* Mobile nav overlay */}
       {mobileNavOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
-          <div
-            className="absolute inset-0 bg-slate-900/40"
+          <button
+            type="button"
+            aria-label="Close navigation"
+            className="absolute inset-0 bg-black/30 backdrop-blur-[1px]"
             onClick={() => setMobileNavOpen(false)}
           />
-          <div className="absolute left-0 top-0 h-full shadow-xl">
+          <div className="absolute left-0 top-0 h-full w-[280px] shadow-[var(--shadow-xl)]">
             <SecondarySidebar
               collapsed={false}
               onToggle={() => {}}
@@ -38,11 +39,10 @@ export function AppShell({ children }: AppShellProps) {
         </div>
       )}
 
-      {/* Main workspace */}
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-h-screen min-w-0 flex-1 flex-col">
         <TopBar onMenuClick={() => setMobileNavOpen(true)} />
-        <main className="flex-1 overflow-y-auto">
-          <div className="mx-auto max-w-6xl px-4 py-5 md:px-6">
+        <main className="min-w-0 flex-1 overflow-y-auto">
+          <div className="mx-auto w-full max-w-[var(--content-max-width)] px-4 py-5 pb-8 sm:px-6 lg:px-8 lg:py-7">
             {children}
           </div>
         </main>

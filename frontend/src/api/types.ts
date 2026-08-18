@@ -48,3 +48,37 @@ export interface DraftResult {
   note: string | null
   status: string | null
 }
+
+
+export interface DashboardMetric {
+  label: string
+  value: number
+  suffix?: string
+  description: string
+  trend?: string
+}
+
+export interface DashboardTarget {
+  role: string
+  progress: number
+}
+
+export interface DashboardOpportunity {
+  role: string
+  company: string
+  opportunityFit: number
+  careerAlignment: number
+}
+
+export interface CareerIntelligenceSignal {
+  label: string
+  value: number
+  description: string
+}
+
+export interface DashboardOverview {
+  metrics: DashboardMetric[]
+  target: DashboardTarget
+  currentOpportunity: DashboardOpportunity
+  intelligence: CareerIntelligenceSignal[]
+}
