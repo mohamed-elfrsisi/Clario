@@ -12,6 +12,9 @@ import { AnalysisPage } from './pages/Analysis'
 import { BulletsPage } from './pages/Bullets'
 import { ProfilePage } from './pages/Profile'
 import { SettingsPage } from './pages/Settings'
+import { CareerProfilePage } from './pages/CareerProfile'
+import { CareerTargetPage } from './pages/CareerTarget'
+import { MyResumePage } from './pages/MyResume'
 import { ComingSoonPage } from './pages/ComingSoon'
 import { useAuth } from './auth/context'
 
@@ -120,15 +123,31 @@ export default function App() {
               </ProtectedRoute>
             } />
 
-            {/* Phase 2 shell routes reserved for upcoming career modules */}
-            {[
-              '/resume',
-              '/career-profile',
-              '/career-target',
-              '/applications',
-              '/mock-interviews',
-              '/career-analytics',
-            ].map((path) => (
+            {/* Career intelligence routes */}
+            <Route path="/resume" element={
+              <ProtectedRoute>
+                <Layout>
+                  <MyResumePage />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/career-profile" element={
+              <ProtectedRoute>
+                <Layout>
+                  <CareerProfilePage />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/career-target" element={
+              <ProtectedRoute>
+                <Layout>
+                  <CareerTargetPage />
+                </Layout>
+              </ProtectedRoute>
+            } />
+
+            {/* Reserved product modules */}
+            {['/applications', '/mock-interviews', '/career-analytics'].map((path) => (
               <Route
                 key={path}
                 path={path}
