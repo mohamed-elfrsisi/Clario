@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useI18n } from '../i18n/hooks'
 import { ArrowRight, Briefcase, Building2, CalendarDays, Plus, Search, Trash2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { api } from '../api/client'
@@ -35,6 +36,7 @@ function formatDate(value?: string) {
 }
 
 export function OpportunitiesPage() {
+  const { t } = useI18n()
   const { add } = useToast()
   const [opportunities, setOpportunities] = useState<Opportunity[]>([])
   const [meta, setMeta] = useState<Record<string, OpportunityMeta>>(readMeta)
@@ -50,7 +52,7 @@ export function OpportunitiesPage() {
       const res = await api.listOpportunities(0, 50)
       setOpportunities(res.data)
     } catch {
-      add('error', 'Failed to load opportunities')
+      add('error', t('Failed to load opportunities'))
     } finally {
       setLoading(false)
     }
@@ -74,7 +76,7 @@ export function OpportunitiesPage() {
   const handleCreate = async (event: React.FormEvent) => {
     event.preventDefault()
     if (!form.title.trim() || !form.company.trim() || !form.text.trim()) {
-      add('error', 'Job title, company, and job description are required')
+      add('error', t('Job title, company, and job description are required'))
       return
     }
 
@@ -94,7 +96,7 @@ export function OpportunitiesPage() {
       }
       setMeta(nextMeta)
       writeMeta(nextMeta)
-      add('success', 'Opportunity saved')
+      add('success', t('Opportunity saved'))
       setShowForm(false)
       setForm({ company: '', title: '', text: '', jobUrl: '' })
       await loadOpportunities()
@@ -114,10 +116,10 @@ export function OpportunitiesPage() {
       delete nextMeta[id]
       setMeta(nextMeta)
       writeMeta(nextMeta)
-      add('success', 'Opportunity deleted')
+      add('success', t('Opportunity deleted'))
       await loadOpportunities()
     } catch {
-      add('error', 'Failed to delete opportunity')
+      add('error', t('Failed to delete opportunity'))
     }
   }
 
@@ -125,8 +127,8 @@ export function OpportunitiesPage() {
     <div className="space-y-7">
       <section className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div className="max-w-2xl">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-accent-text)]">Career intelligence</p>
-          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-[var(--color-text)] sm:text-3xl">Opportunities</h1>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-accent-text)]">{t("Career intelligence")}</p>
+          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-[var(--color-text)] sm:text-3xl">{t("Opportunities")}</h1>
           <p className="mt-2 text-sm leading-6 text-[var(--color-text-secondary)]">{pageDescriptions['/opportunities']}. Compare fit with the career direction you are building toward.</p>
         </div>
         <Button onClick={() => setShowForm((current) => !current)} size="sm">
@@ -142,23 +144,23 @@ export function OpportunitiesPage() {
               <Briefcase className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-base font-semibold text-[var(--color-text)]">Add an opportunity</h2>
-              <p className="mt-1 text-sm text-[var(--color-text-secondary)]">Save the role you are considering. Analysis can be run once your profile and resume are ready.</p>
+              <h2 className="text-base font-semibold text-[var(--color-text)]">{t("Add an opportunity")}</h2>
+              <p className="mt-1 text-sm text-[var(--color-text-secondary)]">{t("Save the role you are considering. Analysis can be run once your profile and resume are ready.")}</p>
             </div>
           </div>
 
           <form onSubmit={handleCreate} className="space-y-5">
             <div className="grid gap-4 sm:grid-cols-2">
               <Input
-                label="Job title"
-                placeholder="Machine Learning Intern"
+                label={t("Job title")}
+                placeholder={t("Machine Learning Intern")}
                 value={form.title}
                 onChange={(event) => setForm({ ...form, title: event.target.value })}
                 required
               />
               <Input
-                label="Company"
-                placeholder="NVIDIA"
+                label={t("Company")}
+                placeholder={t("NVIDIA")}
                 value={form.company}
                 onChange={(event) => setForm({ ...form, company: event.target.value })}
                 required
@@ -166,12 +168,12 @@ export function OpportunitiesPage() {
             </div>
 
             <div>
-              <label htmlFor="job-description" className="mb-1.5 block text-sm font-medium text-[var(--color-text)]">Job description</label>
+              <label htmlFor="job-description" className="mb-1.5 block text-sm font-medium text-[var(--color-text)]">{t("Job description")}</label>
               <textarea
                 id="job-description"
                 required
                 rows={7}
-                placeholder="Paste the full job description here..."
+                placeholder={t("Paste the full job description here...")}
                 value={form.text}
                 onChange={(event) => setForm({ ...form, text: event.target.value })}
                 className="w-full resize-y rounded-[var(--radius-md)] border border-[var(--color-input-border)] bg-[var(--color-input-bg)] px-3 py-3 text-sm leading-6 text-[var(--color-text)] placeholder:text-[var(--color-text-placeholder)] focus:border-[var(--color-focus)] focus:outline-none focus:ring-2 focus:ring-[var(--color-focus-ring)]"
@@ -179,17 +181,17 @@ export function OpportunitiesPage() {
             </div>
 
             <Input
-              label="Job URL"
+              label={t("Job URL")}
               hint="Optional — ready for backend URL support later."
               type="url"
-              placeholder="https://company.com/jobs/..."
+              placeholder={t("https://company.com/jobs/...")}
               value={form.jobUrl}
               onChange={(event) => setForm({ ...form, jobUrl: event.target.value })}
             />
 
             <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-              <Button type="button" variant="secondary" size="sm" onClick={() => setShowForm(false)}>Cancel</Button>
-              <Button type="submit" size="sm" loading={formLoading}>Save opportunity</Button>
+              <Button type="button" variant="secondary" size="sm" onClick={() => setShowForm(false)}>{t("Cancel")}</Button>
+              <Button type="submit" size="sm" loading={formLoading}>{t("Save opportunity")}</Button>
             </div>
           </form>
         </Card>
@@ -198,14 +200,14 @@ export function OpportunitiesPage() {
       <section className="space-y-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-base font-semibold text-[var(--color-text)]">Saved opportunities</h2>
-            <p className="mt-1 text-sm text-[var(--color-text-secondary)]">Your roles, with profile fit and career direction kept separate.</p>
+            <h2 className="text-base font-semibold text-[var(--color-text)]">{t("Saved opportunities")}</h2>
+            <p className="mt-1 text-sm text-[var(--color-text-secondary)]">{t("Your roles, with profile fit and career direction kept separate.")}</p>
           </div>
           {opportunities.length > 0 && (
             <div className="w-full sm:w-72">
               <Input
-                aria-label="Filter opportunities"
-                placeholder="Filter opportunities..."
+                aria-label={t("Filter opportunities")}
+                placeholder={t("Filter opportunities...")}
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
                 leading={<Search className="h-4 w-4" />}
@@ -215,19 +217,19 @@ export function OpportunitiesPage() {
         </div>
 
         {loading ? (
-          <Card><LoadingState label="Loading opportunities..." /></Card>
+          <Card><LoadingState label={t("Loading opportunities...")} /></Card>
         ) : opportunities.length === 0 ? (
           <Card>
             <EmptyState
               icon={Briefcase}
-              title="No opportunities yet"
-              description="Add a role to start understanding how it fits your current profile and career target."
-              action={<Button size="sm" onClick={() => setShowForm(true)}><Plus className="h-4 w-4" /> Add your first opportunity</Button>}
+              title={t("No opportunities yet")}
+              description={t("Add a role to start understanding how it fits your current profile and career target.")}
+              action={<Button size="sm" onClick={() => setShowForm(true)}><Plus className="h-4 w-4" /> {t("Add your first opportunity")}</Button>}
             />
           </Card>
         ) : filtered.length === 0 ? (
           <Card>
-            <EmptyState icon={Search} title="No matching opportunities" description="Try a different company or role search." />
+            <EmptyState icon={Search} title={t("No matching opportunities")} description={t("Try a different company or role search.")} />
           </Card>
         ) : (
           <div className="grid gap-4 lg:grid-cols-2">
@@ -243,19 +245,19 @@ export function OpportunitiesPage() {
                       </div>
                       <h3 className="mt-2 truncate text-lg font-semibold text-[var(--color-text)]">{opportunity.title || 'Untitled opportunity'}</h3>
                     </div>
-                    <Badge variant="success">Active</Badge>
+                    <Badge variant="success">{t("Active")}</Badge>
                   </div>
 
                   <div className="mt-5 grid grid-cols-2 gap-3">
                     <div className="rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface-secondary)] p-3">
-                      <p className="text-xs font-medium text-[var(--color-text-muted)]">Opportunity Fit</p>
+                      <p className="text-xs font-medium text-[var(--color-text-muted)]">{t("Opportunity Fit")}</p>
                       <p className="mt-1 text-2xl font-semibold tabular-nums text-[var(--color-text)]">{saved?.opportunityFit != null ? `${saved.opportunityFit}/100` : '—'}</p>
-                      <p className="mt-1 text-xs text-[var(--color-text-secondary)]">Current profile match</p>
+                      <p className="mt-1 text-xs text-[var(--color-text-secondary)]">{t("Current profile match")}</p>
                     </div>
                     <div className="rounded-[var(--radius-md)] border border-[var(--color-accent-border)] bg-[var(--color-accent-soft)] p-3">
-                      <p className="text-xs font-medium text-[var(--color-accent-text)]">Career Alignment</p>
+                      <p className="text-xs font-medium text-[var(--color-accent-text)]">{t("Career Alignment")}</p>
                       <p className="mt-1 text-2xl font-semibold tabular-nums text-[var(--color-text)]">{saved?.careerAlignment != null ? `${saved.careerAlignment}/100` : '—'}</p>
-                      <p className="mt-1 text-xs text-[var(--color-text-secondary)]">Target direction</p>
+                      <p className="mt-1 text-xs text-[var(--color-text-secondary)]">{t("Target direction")}</p>
                     </div>
                   </div>
 
@@ -270,7 +272,7 @@ export function OpportunitiesPage() {
                       </Button>
                       <Link to={`/analysis?opportunity=${opportunity.opportunity_id}`}>
                         <Button variant="secondary" size="sm">
-                          View analysis
+                          {t("View analysis")}
                           <ArrowRight className="h-4 w-4" />
                         </Button>
                       </Link>

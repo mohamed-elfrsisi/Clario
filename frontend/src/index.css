@@ -215,10 +215,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* The supplied logo remains crisp in both themes; photography is gently dimmed at night to reduce glare. */
-html.dark .auth-photo {
-  filter: brightness(0.76) saturate(0.92);
-}
 
 button, input, textarea, select {
   font: inherit;
@@ -365,3 +361,32 @@ button:disabled {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Phase 10: transparent professional career visual */
+.auth-career-image {
+  max-height: 610px;
+  transform: translateY(2%);
+}
+
+html.dark .auth-career-image {
+  filter: brightness(0.84) saturate(0.92);
+}
+
+/* Phase 11: direction-safe layout helpers */
+html[dir="rtl"] body { font-family: Inter, "Segoe UI", Tahoma, Arial, sans-serif; }
+html[dir="rtl"] .auth-career-image { transform: none; }
+html[dir="rtl"] input[type="email"],
+html[dir="rtl"] input[type="url"],
+html[dir="rtl"] input[name="email"],
+html[dir="rtl"] input[name="url"] { direction: ltr; text-align: left; }
+html[dir="rtl"] input[type="number"] { direction: ltr; }
+html[dir="rtl"] .text-left { text-align: start; }
+html[dir="rtl"] .text-right { text-align: end; }
+
+/* RTL physical-position corrections for the shared shell. */
+html[dir="rtl"] aside.border-r { border-right-width: 0; border-left-width: 1px; }
+html[dir="rtl"] .topbar-search-icon { left: auto; right: 0.75rem; }
+html[dir="rtl"] input[type="search"] { padding-left: 3.5rem; padding-right: 2.25rem; }
+html[dir="rtl"] .topbar-search-shortcut { right: auto; left: 0.625rem; }
+html[dir="rtl"] .auth-password-icon { left: auto; right: 0.75rem; }
+html[dir="rtl"] .auth-password-input { padding-left: 2.75rem; padding-right: 2.25rem; }

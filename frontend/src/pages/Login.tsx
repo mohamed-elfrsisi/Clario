@@ -1,17 +1,19 @@
 import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react'
+import { Mail, Lock, Eye, EyeOff, ArrowRight, ShieldCheck } from 'lucide-react'
 import { useAuth } from '../auth/useAuth'
 import { useToast } from '../hooks/useToast'
 import { AuthLayout } from '../components/auth/AuthLayout'
 import { Input } from '../components/ui/Input'
 import { Button } from '../components/ui/Button'
+import { useI18n } from '../i18n/hooks'
 
 export function LoginPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const { login } = useAuth()
   const { add } = useToast()
+  const { t } = useI18n()
 
   const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/dashboard'
   const [email, setEmail] = useState('')
@@ -49,26 +51,31 @@ export function LoginPage() {
 
   return (
     <AuthLayout
-      eyebrow="Welcome back"
-      title="Sign in to Clario"
-      description="Pick up where you left off and keep building a clearer path toward your next opportunity."
+      eyebrow={t('auth.welcome')}
+      title={t('auth.loginTitle')}
+      description={t('auth.loginDesc')}
       topAction={
         <button type="button" onClick={() => navigate('/register')} className="font-semibold text-[var(--color-blue-text)] hover:underline">
           Create account
         </button>
       }
     >
-      <div className="rounded-[var(--radius-xl)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-[var(--shadow-sm)] sm:p-7">
+      <div className="rounded-[var(--radius-xl)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-[var(--shadow-md)] sm:p-7">
         {errors.general && (
           <div className="mb-5 rounded-xl border border-[var(--color-error-border)] bg-[var(--color-error-bg)] px-3.5 py-3 text-sm text-[var(--color-error-text)]">
             {errors.general}
           </div>
         )}
 
+        <div className="mb-5 flex items-center gap-2 rounded-xl bg-[var(--color-blue-soft)] px-3 py-2.5 text-xs font-medium text-[var(--color-blue-text)]">
+          <ShieldCheck className="h-4 w-4 shrink-0" aria-hidden="true" />
+          Your career workspace stays focused and secure.
+        </div>
+
         <form onSubmit={handleSubmit} className="space-y-5">
           <Input
             id="email"
-            label="Email address"
+            label={t('auth.email')}
             type="email"
             value={email}
             placeholder="you@example.com"
@@ -84,8 +91,7 @@ export function LoginPage() {
 
           <div>
             <div className="mb-1.5 flex items-center justify-between gap-3">
-              <label htmlFor="password" className="text-sm font-medium text-[var(--color-text)]">Password</label>
-              <button type="button" className="text-xs font-semibold text-[var(--color-blue-text)] hover:underline">Forgot password?</button>
+              <label htmlFor="password" className="text-sm font-medium text-[var(--color-text)]">{t('auth.password')}</label>
             </div>
             <div className="relative">
               <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-text-muted)]" />
@@ -93,7 +99,7 @@ export function LoginPage() {
                 id="password"
                 type={showPassword ? 'text' : 'password'}
                 value={password}
-                placeholder="Enter your password"
+                placeholder={t('auth.password')}
                 autoComplete="current-password"
                 disabled={loading}
                 onChange={(event) => {
@@ -116,8 +122,8 @@ export function LoginPage() {
         </form>
 
         <div className="mt-6 border-t border-[var(--color-border)] pt-5 text-center text-sm text-[var(--color-text-secondary)]">
-          New to Clario?{' '}
-          <button type="button" onClick={() => navigate('/register')} className="font-semibold text-[var(--color-blue-text)] hover:underline">Create an account</button>
+          {t('auth.newTo')} {' '}
+          <button type="button" onClick={() => navigate('/register')} className="font-semibold text-[var(--color-blue-text)] hover:underline">{t('auth.createAnAccount')}</button>
         </div>
       </div>
     </AuthLayout>

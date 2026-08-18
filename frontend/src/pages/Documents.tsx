@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef, useCallback } from 'react'
+import { useI18n } from '../i18n/hooks'
 import { FileText, Upload, Trash2, X, CheckCircle2 } from 'lucide-react'
 import { api } from '../api/client'
 import type { Document } from '../api/types'
@@ -9,6 +10,7 @@ import { Badge } from '../components/ui/Badge'
 import { EmptyState } from '../components/ui/EmptyState'
 
 export function DocumentsPage() {
+  const { t } = useI18n()
   const { add } = useToast()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [documents, setDocuments] = useState<Document[]>([])
@@ -24,7 +26,7 @@ export function DocumentsPage() {
       const res = await api.listDocuments(0, 50)
       setDocuments(res.data)
     } catch {
-      add('error', 'Failed to load documents')
+      add('error', t('Failed to load documents'))
     } finally {
       setLoading(false)
     }
@@ -40,7 +42,7 @@ export function DocumentsPage() {
       const res = await api.uploadDocument(file)
       setUploadedDoc(res.data)
       setShowUploaded(true)
-      add('success', 'Document uploaded successfully')
+      add('success', t('Document uploaded successfully'))
       loadDocuments()
     } catch (err: unknown) {
       const detail = (err as { response?: { data?: { detail?: string } } }).response?.data?.detail || 'Upload failed'
@@ -56,10 +58,10 @@ export function DocumentsPage() {
     setDeletingId(id)
     try {
       await api.deleteDocument(id)
-      add('success', 'Document deleted')
+      add('success', t('Document deleted'))
       loadDocuments()
     } catch {
-      add('error', 'Failed to delete document')
+      add('error', t('Failed to delete document'))
     } finally {
       setDeletingId(null)
     }
@@ -69,8 +71,8 @@ export function DocumentsPage() {
     <div className="space-y-5">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-placeholder)]">Workspace</p>
-          <h2 className="mt-1 text-lg font-semibold text-[var(--color-text)]">Documents</h2>
+          <p className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-placeholder)]">{t("Workspace")}</p>
+          <h2 className="mt-1 text-lg font-semibold text-[var(--color-text)]">{t("Documents")}</h2>
           <p className="mt-0.5 text-sm text-[var(--color-text-muted)]">{pageDescriptions['/documents']}</p>
         </div>
         <button
@@ -98,7 +100,7 @@ export function DocumentsPage() {
               <p className="text-sm font-medium text-[var(--color-text)]">{uploadedDoc.filename || 'Uploaded document'}</p>
               {uploadedDoc.parse_ability_score != null && (
                 <p className="mt-0.5 text-xs text-[var(--color-text-muted)]">
-                  Parse score: {(uploadedDoc.parse_ability_score * 100).toFixed(0)}%
+                  {t("Parse score:")} {(uploadedDoc.parse_ability_score * 100).toFixed(0)}%
                 </p>
               )}
               {uploadedDoc.parse_risk_flags.length > 0 && (
@@ -124,11 +126,11 @@ export function DocumentsPage() {
         <div className="border border-[var(--color-border)] bg-[var(--color-surface)]">
           <EmptyState
             icon={FileText}
-            title="No documents yet"
-            description="Upload your first resume document to get started."
+            title={t("No documents yet")}
+            description={t("Upload your first resume document to get started.")}
             action={
               <button onClick={() => fileInputRef.current?.click()} className="btn btn-primary text-xs">
-                Upload document
+                {t("Upload document")}
               </button>
             }
           />
@@ -136,11 +138,11 @@ export function DocumentsPage() {
       ) : (
         <Table>
           <TableHead>
-            <TableHeaderCell>File</TableHeaderCell>
-            <TableHeaderCell>Type</TableHeaderCell>
-            <TableHeaderCell>Parse Score</TableHeaderCell>
-            <TableHeaderCell>Status</TableHeaderCell>
-            <TableHeaderCell className="text-right">Actions</TableHeaderCell>
+            <TableHeaderCell>{t("File")}</TableHeaderCell>
+            <TableHeaderCell>{t("Type")}</TableHeaderCell>
+            <TableHeaderCell>{t("Parse Score")}</TableHeaderCell>
+            <TableHeaderCell>{t("Status")}</TableHeaderCell>
+            <TableHeaderCell className="text-right">{t("Actions")}</TableHeaderCell>
           </TableHead>
           <TableBody>
             {documents.map((doc) => (
@@ -169,7 +171,7 @@ export function DocumentsPage() {
                     className="inline-flex items-center gap-1 text-xs font-medium text-[var(--color-text-muted)] hover:text-[var(--color-error-text)] disabled:opacity-50"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
-                    Delete
+                    {t("Delete")}
                   </button>
                 </TableCell>
               </TableRow>

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useI18n } from '../i18n/hooks'
 import { Pencil, Copy, AlertCircle, ArrowDown } from 'lucide-react'
 import { api } from '../api/client'
 import type { BulletRewriteResult } from '../api/types'
@@ -6,6 +7,7 @@ import { useToast } from '../hooks/useToast'
 import { pageDescriptions } from '../config/navigation'
 
 export function BulletsPage() {
+  const { t } = useI18n()
   const { add } = useToast()
   const [input, setInput] = useState('')
   const [results, setResults] = useState<BulletRewriteResult[]>([])
@@ -18,7 +20,7 @@ export function BulletsPage() {
   const handleRewrite = async (e: React.FormEvent) => {
     e.preventDefault()
     if (bullets.length === 0) {
-      add('error', 'Please enter at least one bullet point')
+      add('error', t('Please enter at least one bullet point'))
       return
     }
 
@@ -38,7 +40,7 @@ export function BulletsPage() {
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text)
-    add('success', 'Copied to clipboard')
+    add('success', t('Copied to clipboard'))
   }
 
   const selected = results[selectedIdx]
@@ -46,8 +48,8 @@ export function BulletsPage() {
   return (
     <div className="space-y-5">
       <div>
-        <p className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-placeholder)]">Career Intelligence</p>
-        <h2 className="mt-1 text-lg font-semibold text-[var(--color-text)]">Bullet Writer</h2>
+        <p className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-placeholder)]">{t("Career Intelligence")}</p>
+        <h2 className="mt-1 text-lg font-semibold text-[var(--color-text)]">{t("Bullet Writer")}</h2>
         <p className="mt-0.5 text-sm text-[var(--color-text-muted)]">{pageDescriptions['/bullets']}</p>
       </div>
 
@@ -56,8 +58,8 @@ export function BulletsPage() {
           {/* Original input */}
           <div className="border border-[var(--color-border)] bg-[var(--color-surface)]">
             <div className="flex items-center justify-between border-b border-[var(--color-border)] px-3 py-2">
-              <span className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">Original</span>
-              <span className="text-[11px] text-[var(--color-text-placeholder)]">{bullets.length} bullets · {wordCount} words</span>
+              <span className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">{t("Original")}</span>
+              <span className="text-[11px] text-[var(--color-text-placeholder)]">{bullets.length} {t("bullets ·")} {wordCount} {t("words")}</span>
             </div>
             <textarea
               className="w-full resize-y border-0 px-3 py-3 font-mono text-sm text-[var(--color-text-secondary)] focus:outline-none focus:ring-0 min-h-[220px]"
@@ -70,7 +72,7 @@ export function BulletsPage() {
           {/* Result */}
           <div className="border border-[var(--color-border)] bg-[var(--color-surface)]">
             <div className="flex items-center justify-between border-b border-[var(--color-border)] px-3 py-2">
-              <span className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">Clario</span>
+              <span className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">{t("Clario")}</span>
               {selected && (
                 <button
                   type="button"
@@ -78,7 +80,7 @@ export function BulletsPage() {
                   className="inline-flex items-center gap-1 text-[11px] font-medium text-[var(--color-accent-text)] hover:text-[var(--color-accent-text)]"
                 >
                   <Copy className="h-3 w-3" />
-                  Copy
+                  {t("Copy")}
                 </button>
               )}
             </div>
@@ -102,7 +104,7 @@ export function BulletsPage() {
               ) : (
                 <div className="flex h-full flex-col items-center justify-center py-16 text-center">
                   <ArrowDown className="h-5 w-5 text-[var(--color-border-strong)]" />
-                  <p className="mt-2 text-xs text-[var(--color-text-placeholder)]">Rewritten bullets will appear here</p>
+                  <p className="mt-2 text-xs text-[var(--color-text-placeholder)]">{t("Rewritten bullets will appear here")}</p>
                 </div>
               )}
             </div>
@@ -115,7 +117,7 @@ export function BulletsPage() {
             {loading ? 'Rewriting...' : 'Rewrite bullets'}
           </button>
           <button type="button" onClick={() => { setInput(''); setResults([]) }} className="btn btn-ghost text-xs">
-            Clear
+            {t("Clear")}
           </button>
         </div>
       </form>
@@ -125,7 +127,7 @@ export function BulletsPage() {
         <div className="border border-[var(--color-border)] bg-[var(--color-surface)]">
           <div className="border-b border-[var(--color-border)] px-3 py-2">
             <span className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
-              All results ({results.length})
+              {t("All results (")}{results.length})
             </span>
           </div>
           <div className="divide-y divide-[var(--color-border)]">

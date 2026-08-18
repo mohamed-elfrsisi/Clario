@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useI18n } from '../i18n/hooks'
 import { Award, BriefcaseBusiness, FolderKanban, GraduationCap, Lightbulb, Wrench } from 'lucide-react'
 import type { CareerProfile as CareerProfileData } from '../api/careerTypes'
 import { careerService } from '../services/careerService'
@@ -9,6 +10,7 @@ import { TagList } from '../components/career/TagList'
 import { SectionHeading } from '../components/career/SectionHeading'
 
 export function CareerProfilePage() {
+  const { t } = useI18n()
   const [profile, setProfile] = useState<CareerProfileData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
@@ -28,19 +30,19 @@ export function CareerProfilePage() {
     return () => { active = false }
   }, [])
 
-  if (loading) return <LoadingState label="Loading career profile..." />
-  if (error || !profile) return <ErrorState title="Unable to load career profile" description="Please try again later." />
+  if (loading) return <LoadingState label={t("Loading career profile...")} />
+  if (error || !profile) return <ErrorState title={t("Unable to load career profile")} description={t("Please try again later.")} />
 
   return (
     <div className="space-y-6">
       <SectionHeading
         eyebrow="Career Intelligence"
-        title="Career Profile"
-        description="Your master career profile brings together the evidence Clario can use across your career workflow."
+        title={t("Career Profile")}
+        description={t("Your master career profile brings together the evidence Clario can use across your career workflow.")}
       />
 
       <Card className="p-5 sm:p-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-text-muted)]">Current role & status</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-text-muted)]">{t("Current role & status")}</p>
         <div className="mt-3 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div>
             <h2 className="text-xl font-semibold text-[var(--color-text)]">{profile.currentRole}</h2>
@@ -51,18 +53,18 @@ export function CareerProfilePage() {
 
       <div className="grid gap-5 lg:grid-cols-2">
         <Card className="p-5">
-          <div className="flex items-center gap-2"><Lightbulb className="h-4 w-4 text-[var(--color-accent-text)]" /><h2 className="font-semibold">Skills</h2></div>
+          <div className="flex items-center gap-2"><Lightbulb className="h-4 w-4 text-[var(--color-accent-text)]" /><h2 className="font-semibold">{t("Skills")}</h2></div>
           <div className="mt-4"><TagList items={profile.skills} variant="accent" /></div>
         </Card>
         <Card className="p-5">
-          <div className="flex items-center gap-2"><Wrench className="h-4 w-4 text-[var(--color-accent-text)]" /><h2 className="font-semibold">Technologies</h2></div>
+          <div className="flex items-center gap-2"><Wrench className="h-4 w-4 text-[var(--color-accent-text)]" /><h2 className="font-semibold">{t("Technologies")}</h2></div>
           <div className="mt-4"><TagList items={profile.technologies} variant="info" /></div>
         </Card>
       </div>
 
       <div className="grid gap-5 xl:grid-cols-2">
         <Card className="p-5">
-          <div className="flex items-center gap-2"><BriefcaseBusiness className="h-4 w-4 text-[var(--color-accent-text)]" /><h2 className="font-semibold">Experience</h2></div>
+          <div className="flex items-center gap-2"><BriefcaseBusiness className="h-4 w-4 text-[var(--color-accent-text)]" /><h2 className="font-semibold">{t("Experience")}</h2></div>
           <div className="mt-4 space-y-5">
             {profile.experience.map((item) => (
               <div key={item.id} className="border-l-2 border-[var(--color-accent-border)] pl-4">
@@ -77,7 +79,7 @@ export function CareerProfilePage() {
         </Card>
 
         <Card className="p-5">
-          <div className="flex items-center gap-2"><FolderKanban className="h-4 w-4 text-[var(--color-accent-text)]" /><h2 className="font-semibold">Projects</h2></div>
+          <div className="flex items-center gap-2"><FolderKanban className="h-4 w-4 text-[var(--color-accent-text)]" /><h2 className="font-semibold">{t("Projects")}</h2></div>
           <div className="mt-4 space-y-4">
             {profile.projects.map((item) => (
               <div key={item.id} className="rounded-[var(--radius-md)] bg-[var(--color-surface-secondary)] p-4">
@@ -92,15 +94,15 @@ export function CareerProfilePage() {
 
       <div className="grid gap-5 md:grid-cols-3">
         <Card className="p-5">
-          <div className="flex items-center gap-2"><GraduationCap className="h-4 w-4 text-[var(--color-accent-text)]" /><h2 className="font-semibold">Education</h2></div>
+          <div className="flex items-center gap-2"><GraduationCap className="h-4 w-4 text-[var(--color-accent-text)]" /><h2 className="font-semibold">{t("Education")}</h2></div>
           <ul className="mt-4 space-y-3 text-sm text-[var(--color-text-secondary)]">{profile.education.map((item) => <li key={item}>{item}</li>)}</ul>
         </Card>
         <Card className="p-5">
-          <div className="flex items-center gap-2"><Award className="h-4 w-4 text-[var(--color-accent-text)]" /><h2 className="font-semibold">Certifications</h2></div>
+          <div className="flex items-center gap-2"><Award className="h-4 w-4 text-[var(--color-accent-text)]" /><h2 className="font-semibold">{t("Certifications")}</h2></div>
           <ul className="mt-4 space-y-3 text-sm text-[var(--color-text-secondary)]">{profile.certifications.map((item) => <li key={item}>{item}</li>)}</ul>
         </Card>
         <Card className="p-5">
-          <div className="flex items-center gap-2"><Award className="h-4 w-4 text-[var(--color-accent-text)]" /><h2 className="font-semibold">Achievements</h2></div>
+          <div className="flex items-center gap-2"><Award className="h-4 w-4 text-[var(--color-accent-text)]" /><h2 className="font-semibold">{t("Achievements")}</h2></div>
           <ul className="mt-4 space-y-3 text-sm text-[var(--color-text-secondary)]">{profile.achievements.map((item) => <li key={item}>{item}</li>)}</ul>
         </Card>
       </div>

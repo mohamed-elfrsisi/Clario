@@ -6,6 +6,7 @@ import { MetricCard } from '../components/ui/MetricCard'
 import type { DashboardOverview } from '../api/types'
 import { dashboardService } from '../services/dashboardService'
 import { useAuth } from '../auth/useAuth'
+import { useI18n } from '../i18n/hooks'
 
 function displayName(email?: string | null) {
   const localPart = email?.split('@')[0]?.trim()
@@ -21,9 +22,41 @@ function scoreClass(value: number) {
   return 'text-[var(--color-error-text)]'
 }
 
+function dashboardLabel(t: ReturnType<typeof useI18n>['t'], label: string) {
+  const map: Record<string, Parameters<typeof t>[0]> = {
+    'Career Score': 'dashboard.careerScore',
+    'Resume Score': 'dashboard.resumeScore',
+    'Average Opportunity Fit': 'dashboard.averageOpportunityFit',
+    'Interview Readiness': 'dashboard.interviewReadiness',
+    'Technical Skills': 'dashboard.technicalSkills',
+    'Experience': 'dashboard.experience',
+    'Resume Quality': 'dashboard.resumeQuality',
+    'Opportunity Fit': 'dashboard.opportunityFit',
+  }
+  const key = map[label]
+  return key ? t(key) : label
+}
+
+function dashboardDescription(t: ReturnType<typeof useI18n>['t'], description: string) {
+  const map: Record<string, Parameters<typeof t>[0]> = {
+    'Overall career readiness': 'dashboard.overallCareerReadiness',
+    'ATS and content quality': 'dashboard.atsContentQuality',
+    'Across analyzed opportunities': 'dashboard.acrossAnalyzedOpportunities',
+    'Skills and interview preparation': 'dashboard.skillsInterviewPreparation',
+    'Strong foundation for your target role': 'dashboard.strongFoundation',
+    'More applied ML experience would strengthen your profile': 'dashboard.moreAppliedML',
+    'Clear structure with good ATS coverage': 'dashboard.clearATS',
+    'Current opportunity matches most of your profile': 'dashboard.currentOpportunityMatches',
+    'Technical interview practice is the next priority': 'dashboard.technicalPracticePriority',
+  }
+  const key = map[description]
+  return key ? t(key) : description
+}
+
 export function DashboardPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const { t } = useI18n()
   const [overview, setOverview] = useState<DashboardOverview | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -48,15 +81,15 @@ export function DashboardPage() {
     <div className="space-y-7">
       <section>
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-accent-text)]">
-          Career Intelligence
+          {t('dashboard.careerIntelligence')}
         </p>
         <div className="mt-2 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
           <div>
             <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-              Welcome back, {displayName(user?.email)}
+              {t('dashboard.welcomeBack')}, {displayName(user?.email)}
             </h1>
             <p className="mt-1.5 text-sm text-[var(--color-text-secondary)]">
-              Your career intelligence overview
+              {t('dashboard.overview')}
             </p>
           </div>
           <button
@@ -64,13 +97,13 @@ export function DashboardPage() {
             onClick={() => navigate('/career-target')}
             className="inline-flex w-fit items-center gap-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3.5 py-2 text-sm font-medium text-[var(--color-text)] shadow-[var(--shadow-xs)] transition hover:bg-[var(--color-surface-hover)]"
           >
-            Review career target
+            {t('dashboard.reviewTarget')}
             <ArrowUpRight className="h-4 w-4" />
           </button>
         </div>
       </section>
 
-      <section aria-label="Career metrics" className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <section aria-label={t('dashboard.careerMetrics')} className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {loading
           ? Array.from({ length: 4 }).map((_, index) => (
               <div
@@ -81,7 +114,7 @@ export function DashboardPage() {
           : metrics.map((metric) => (
               <MetricCard
                 key={metric.label}
-                label={metric.label}
+                label={dashboardLabel(t, metric.label)}
                 accent={
                   metric.label === 'Career Score'
                     ? 'blue'
@@ -101,7 +134,7 @@ export function DashboardPage() {
                 }
                 change={metric.trend}
                 trend="up"
-                description={metric.description}
+                description={dashboardDescription(t, metric.description)}
               />
             ))}
       </section>
@@ -117,7 +150,7 @@ export function DashboardPage() {
                   </div>
                   <div>
                     <p className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)]">
-                      Career Target
+                      {t('dashboard.careerTarget')}
                     </p>
                     <h2 className="mt-0.5 text-base font-semibold">{overview.target.role}</h2>
                   </div>
@@ -130,9 +163,9 @@ export function DashboardPage() {
 
             <div className="mt-5">
               <div className="mb-2 flex items-center justify-between text-xs">
-                <span className="text-[var(--color-text-muted)]">Progress</span>
+                <span className="text-[var(--color-text-muted)]">{t('dashboard.progress')}</span>
                 <span className="font-medium text-[var(--color-text-secondary)]">
-                  {overview.target.progress}% aligned
+                  {overview.target.progress}% {t('dashboard.aligned')}
                 </span>
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-[var(--color-surface-tertiary)]">
@@ -148,7 +181,7 @@ export function DashboardPage() {
               onClick={() => navigate('/career-target')}
               className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--color-accent-text)] hover:underline"
             >
-              Manage target
+              {t('dashboard.manageTarget')}
               <ChevronRight className="h-4 w-4" />
             </button>
           </Card>
@@ -161,7 +194,7 @@ export function DashboardPage() {
                 </div>
                 <div>
                   <p className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)]">
-                    Current Opportunity
+                    {t('dashboard.currentOpportunity')}
                   </p>
                   <h2 className="mt-0.5 text-base font-semibold">{overview.currentOpportunity.role}</h2>
                   <p className="mt-0.5 text-sm text-[var(--color-text-secondary)]">
@@ -173,12 +206,12 @@ export function DashboardPage() {
 
             <div className="mt-5 grid grid-cols-2 gap-3">
               <ScoreBlock
-                label="Opportunity Fit"
+                label={t('dashboard.opportunityFit')}
                 value={overview.currentOpportunity.opportunityFit}
                 icon={<TrendingUp className="h-3.5 w-3.5" />}
               />
               <ScoreBlock
-                label="Career Alignment"
+                label={t('dashboard.careerAlignment')}
                 value={overview.currentOpportunity.careerAlignment}
                 icon={<CircleCheck className="h-3.5 w-3.5" />}
               />
@@ -190,14 +223,14 @@ export function DashboardPage() {
                 onClick={() => navigate('/analysis')}
                 className="flex-1 rounded-lg bg-[var(--color-accent)] px-3 py-2 text-sm font-semibold text-[var(--color-accent-contrast)] transition hover:bg-[var(--color-accent-hover)]"
               >
-                View Analysis
+                {t('dashboard.viewAnalysis')}
               </button>
               <button
                 type="button"
                 onClick={() => navigate('/mock-interviews')}
                 className="flex-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm font-semibold text-[var(--color-text)] transition hover:bg-[var(--color-surface-hover)]"
               >
-                Mock Interview
+                {t('dashboard.mockInterview')}
               </button>
             </div>
           </Card>
@@ -209,20 +242,20 @@ export function DashboardPage() {
           <div className="mb-3 flex items-end justify-between gap-3">
             <div>
               <p className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)]">
-                Career Intelligence
+                {t('dashboard.careerIntelligence')}
               </p>
-              <h2 className="mt-1 text-lg font-semibold">Your readiness signals</h2>
+              <h2 className="mt-1 text-lg font-semibold">{t('dashboard.readinessSignals')}</h2>
             </div>
             <span className="hidden text-xs text-[var(--color-text-muted)] sm:block">
-              Updated from your latest profile data
+              {t('dashboard.updatedProfile')}
             </span>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {overview.intelligence.map((signal) => (
-              <Card key={signal.label} className="p-4">
+              <Card key={dashboardLabel(t, signal.label)} className="p-4">
                 <div className="flex items-center justify-between gap-3">
-                  <p className="text-sm font-medium text-[var(--color-text-secondary)]">{signal.label}</p>
+                  <p className="text-sm font-medium text-[var(--color-text-secondary)]">{dashboardLabel(t, signal.label)}</p>
                   <p className={`text-lg font-semibold tabular-nums ${scoreClass(signal.value)}`}>
                     {signal.value}
                   </p>
@@ -234,7 +267,7 @@ export function DashboardPage() {
                   />
                 </div>
                 <p className="mt-2.5 text-xs leading-5 text-[var(--color-text-muted)]">
-                  {signal.description}
+                  {dashboardDescription(t, signal.description)}
                 </p>
               </Card>
             ))}

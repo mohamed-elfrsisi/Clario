@@ -12,70 +12,67 @@ interface AuthLayoutProps {
 
 function CareerVisual() {
   return (
-    <div className="relative hidden min-h-screen overflow-hidden lg:flex lg:flex-1 lg:items-center lg:justify-center lg:bg-[var(--color-bg)] lg:p-8 xl:p-12">
-      <div className="absolute inset-0 bg-[var(--color-bg)]" aria-hidden="true" />
-      <div className="absolute right-10 top-16 h-24 w-24 rounded-full bg-[var(--color-yellow-soft)]" aria-hidden="true" />
-      <div className="absolute bottom-12 left-10 h-28 w-28 rounded-full bg-[var(--color-blue-soft)]" aria-hidden="true" />
-      <div className="absolute bottom-24 right-28 h-16 w-16 rounded-full bg-[var(--color-green-soft)]" aria-hidden="true" />
+    <section
+      className="relative hidden min-h-screen overflow-hidden border-l border-[var(--color-border)] bg-[var(--color-surface-secondary)] lg:flex lg:items-center lg:justify-center lg:p-8 xl:p-12"
+      aria-label="Clario career intelligence overview"
+    >
+      <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+        <div className="absolute -right-24 -top-24 h-80 w-80 rounded-full bg-[var(--color-blue-soft)] opacity-70 blur-3xl" />
+        <div className="absolute -bottom-28 -left-24 h-80 w-80 rounded-full bg-[var(--color-green-soft)] opacity-60 blur-3xl" />
+      </div>
 
-      <div className="relative w-full max-w-[620px]">
-        <div className="mb-5 flex items-center gap-2 text-sm font-semibold text-[var(--color-text-secondary)]">
-          <span className="flex h-8 w-8 items-center justify-center rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[var(--shadow-xs)]">
-            <Sparkles className="h-4 w-4 text-[var(--color-blue)]" />
+      <div className="relative w-full max-w-[760px]">
+        <div className="mb-6 flex items-center gap-3 text-sm font-semibold text-[var(--color-text-secondary)]">
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[var(--shadow-xs)]">
+            <Sparkles className="h-4 w-4 text-[var(--color-blue)]" aria-hidden="true" />
           </span>
           Career intelligence, made clear.
         </div>
 
-        <div className="relative overflow-hidden rounded-[28px] border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[var(--shadow-md)]">
-          <div className="flex h-1 w-full" aria-hidden="true">
-            <span className="flex-1 bg-[var(--color-blue)]" />
-            <span className="flex-1 bg-[var(--color-red)]" />
-            <span className="flex-1 bg-[var(--color-yellow)]" />
-            <span className="flex-1 bg-[var(--color-green)]" />
-          </div>
-
-          <div className="grid md:grid-cols-[1.02fr_0.98fr]">
-            <div className="order-2 p-6 sm:p-8 md:order-1">
+        <div className="overflow-hidden rounded-[var(--radius-2xl)] border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[var(--shadow-lg)]">
+          <div className="grid min-h-[570px] md:grid-cols-[0.9fr_1.1fr]">
+            <div className="flex flex-col justify-center p-7 sm:p-9">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-blue-text)]">
                 Your career, connected
               </p>
-              <h2 className="mt-3 text-3xl font-semibold leading-tight tracking-tight text-[var(--color-text)] sm:text-4xl">
+              <h2 className="mt-3 max-w-sm text-3xl font-semibold leading-tight tracking-tight text-[var(--color-text)] sm:text-[2.65rem]">
                 Know where you are. Know what comes next.
               </h2>
-              <p className="mt-3 max-w-md text-sm leading-6 text-[var(--color-text-secondary)]">
+              <p className="mt-4 max-w-md text-sm leading-6 text-[var(--color-text-secondary)]">
                 Clario connects your profile, target, resume and opportunities so every career decision has context.
               </p>
 
-              <div className="mt-6 grid grid-cols-2 gap-3">
+              <div className="mt-7 grid grid-cols-2 gap-3">
                 <MiniSignal color="blue" label="Career target" value="76%" />
                 <MiniSignal color="green" label="Resume quality" value="88" />
                 <MiniSignal color="yellow" label="Interview readiness" value="73" />
                 <MiniSignal color="red" label="Critical gaps" value="3" />
               </div>
 
-              <div className="mt-6 flex items-center gap-2 text-xs font-medium text-[var(--color-text-secondary)]">
-                <CheckCircle2 className="h-4 w-4 text-[var(--color-green)]" />
+              <div className="mt-6 flex items-start gap-2 text-xs font-medium leading-5 text-[var(--color-text-secondary)]">
+                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-green)]" aria-hidden="true" />
                 Built around evidence, not empty scores.
               </div>
             </div>
 
-            <div className="order-1 min-h-[360px] overflow-hidden bg-[var(--color-surface-secondary)] md:order-2">
-              <div className="relative h-full min-h-[360px]">
-                <img
-                  src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=85"
-                  alt="Professional working at a laptop in a modern workspace"
-                  className="auth-photo h-full min-h-[360px] w-full object-cover"
-                  loading="eager"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" aria-hidden="true" />
-                <div className="absolute left-4 top-4 flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-xs font-semibold text-[var(--color-text)] shadow-[var(--shadow-sm)] backdrop-blur-sm">
-                  <span className="h-2.5 w-2.5 rounded-full bg-[var(--color-blue)]" />
-                  Career progress
-                </div>
-                <div className="absolute bottom-4 right-4 flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-xs font-semibold text-[var(--color-text)] shadow-[var(--shadow-sm)] backdrop-blur-sm">
-                  <span className="h-2.5 w-2.5 rounded-full bg-[var(--color-green)]" />
-                  Strong match
-                </div>
+            <div className="relative flex min-h-[420px] items-end justify-center overflow-hidden bg-[var(--color-surface-tertiary)] px-3 pt-8 sm:px-6">
+              <div
+                className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_70%_28%,var(--color-blue-soft),transparent_42%),radial-gradient(circle_at_30%_78%,var(--color-green-soft),transparent_38%)] opacity-80"
+                aria-hidden="true"
+              />
+              <img
+                src="/brand/clario-career-professional.png"
+                alt="Professional working on a laptop in a focused career workspace"
+                className="auth-career-image relative z-10 h-auto w-full max-w-[570px] object-contain object-bottom drop-shadow-[0_18px_28px_rgb(0_0_0/0.14)]"
+                loading="eager"
+              />
+              <div className="absolute right-5 top-5 z-20 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-xs font-semibold text-[var(--color-text)] shadow-[var(--shadow-sm)]">
+                <span className="mr-2 inline-block h-2 w-2 rounded-full bg-[var(--color-blue)]" />
+                Career progress
+              </div>
+              <div className="absolute bottom-5 right-5 z-20 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-xs font-semibold text-[var(--color-text)] shadow-[var(--shadow-sm)]">
+                <span className="mr-2 inline-block h-2 w-2 rounded-full bg-[var(--color-green)]" />
+                Strong match
               </div>
             </div>
           </div>
@@ -84,11 +81,11 @@ function CareerVisual() {
         <div className="mt-4 flex items-center justify-between px-1 text-xs text-[var(--color-text-muted)]">
           <span>Clario Career Intelligence</span>
           <span className="inline-flex items-center gap-1 font-medium text-[var(--color-blue-text)]">
-            Explore the workspace <ArrowUpRight className="h-3.5 w-3.5" />
+            Your next step starts here <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
           </span>
         </div>
       </div>
-    </div>
+    </section>
   )
 }
 
@@ -101,8 +98,8 @@ function MiniSignal({ color, label, value }: { color: 'blue' | 'green' | 'yellow
   }[color]
 
   return (
-    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-secondary)] p-3">
-      <div className={`mb-2 h-1.5 w-10 rounded-full ${colorClass}`} />
+    <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-secondary)] p-3">
+      <div className={`mb-2 h-1.5 w-9 rounded-full ${colorClass}`} aria-hidden="true" />
       <p className="text-xs text-[var(--color-text-muted)]">{label}</p>
       <p className="mt-1 text-lg font-semibold tabular-nums text-[var(--color-text)]">{value}</p>
     </div>
@@ -113,7 +110,7 @@ export function AuthLayout({ children, eyebrow, title, description, topAction }:
   return (
     <main className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)]">
       <div className="min-h-screen lg:flex">
-        <section className="flex w-full flex-col px-5 py-6 sm:px-8 lg:w-[46%] lg:max-w-[680px] lg:px-12 xl:px-16">
+        <section className="flex w-full flex-col px-5 py-6 sm:px-8 lg:w-[44%] lg:max-w-[680px] lg:px-12 xl:px-16">
           <header className="flex items-center justify-between">
             <button type="button" className="flex items-center gap-2.5" aria-label="Go to Clario home">
               <BrandLogo size="sm" />
@@ -123,21 +120,14 @@ export function AuthLayout({ children, eyebrow, title, description, topAction }:
           </header>
 
           <div className="flex flex-1 items-center py-10 lg:py-12">
-            <div className="mx-auto w-full max-w-[440px]">
+            <div className="mx-auto w-full max-w-[430px]">
               <div className="mb-7">
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-blue-text)]">{eyebrow}</p>
                 <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">{title}</h1>
-                <p className="mt-2 max-w-md text-sm leading-6 text-[var(--color-text-secondary)]">{description}</p>
+                <p className="mt-3 max-w-md text-sm leading-6 text-[var(--color-text-secondary)]">{description}</p>
               </div>
-              <div className="relative">
-                <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex h-1 overflow-hidden rounded-t-[var(--radius-xl)]" aria-hidden="true">
-                  <span className="flex-1 bg-[var(--color-blue)]" />
-                  <span className="flex-1 bg-[var(--color-green)]" />
-                  <span className="flex-1 bg-[var(--color-yellow)]" />
-                  <span className="flex-1 bg-[var(--color-red)]" />
-                </div>
-                {children}
-              </div>
+
+              <div>{children}</div>
             </div>
           </div>
 

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { useI18n } from '../i18n/hooks'
 import { Save, Trash2, Plus, Wand2 } from 'lucide-react'
 import { api } from '../api/client'
 import type { Profile, TailorResult, ExperienceEntry } from '../api/types'
@@ -7,6 +8,7 @@ import { pageDescriptions } from '../config/navigation'
 import { Badge } from '../components/ui/Badge'
 
 export function ProfilePage() {
+  const { t } = useI18n()
   const { add } = useToast()
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(false)
@@ -25,7 +27,7 @@ export function ProfilePage() {
       setExperiences(res.data.master_experience as ExperienceEntry[] || [])
     } catch (err: unknown) {
       if ((err as { response?: { status?: number } }).response?.status !== 404) {
-        add('error', 'Failed to load profile')
+        add('error', t('Failed to load profile'))
       }
     } finally {
       setLoading(false)
@@ -45,7 +47,7 @@ export function ProfilePage() {
     e.preventDefault()
     const skillList = skills.split(',').map((s) => s.trim()).filter(Boolean)
     if (skillList.length === 0) {
-      add('error', 'Please add at least one skill')
+      add('error', t('Please add at least one skill'))
       return
     }
 
@@ -56,7 +58,7 @@ export function ProfilePage() {
         master_experience: experiences,
       })
       setProfile(res.data)
-      add('success', 'Profile saved')
+      add('success', t('Profile saved'))
     } catch (err: unknown) {
       const detail = (err as { response?: { data?: { detail?: string } } }).response?.data?.detail || 'Failed to save profile'
       add('error', detail)
@@ -67,7 +69,7 @@ export function ProfilePage() {
 
   const handleTailor = async () => {
     if (!profile) {
-      add('error', 'No profile to tailor. Create one first.')
+      add('error', t('No profile to tailor. Create one first.'))
       return
     }
     const oppId = window.prompt('Enter opportunity ID:')
@@ -77,7 +79,7 @@ export function ProfilePage() {
     try {
       const res = await api.tailorProfile(oppId)
       setTailoredResult(res.data)
-      add('success', 'Profile tailored')
+      add('success', t('Profile tailored'))
     } catch (err: unknown) {
       const detail = (err as { response?: { data?: { detail?: string } } }).response?.data?.detail || 'Tailoring failed'
       add('error', detail)
@@ -104,13 +106,13 @@ export function ProfilePage() {
     <div className="space-y-5">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-placeholder)]">Career Builder</p>
-          <h2 className="mt-1 text-lg font-semibold text-[var(--color-text)]">Profile</h2>
+          <p className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-placeholder)]">{t("Career Builder")}</p>
+          <h2 className="mt-1 text-lg font-semibold text-[var(--color-text)]">{t("Profile")}</h2>
           <p className="mt-0.5 text-sm text-[var(--color-text-muted)]">{pageDescriptions['/profile']}</p>
         </div>
         {profile && (
           <div className="text-right">
-            <p className="text-[11px] font-medium uppercase tracking-wider text-[var(--color-text-placeholder)]">Completeness</p>
+            <p className="text-[11px] font-medium uppercase tracking-wider text-[var(--color-text-placeholder)]">{t("Completeness")}</p>
             <p className="text-lg font-semibold tabular-nums text-[var(--color-text)]">{completeness}%</p>
           </div>
         )}
@@ -125,17 +127,17 @@ export function ProfilePage() {
           {/* Skills section */}
           <section className="border border-[var(--color-border)] bg-[var(--color-surface)]">
             <div className="border-b border-[var(--color-border)] px-4 py-2.5">
-              <h3 className="text-sm font-semibold text-[var(--color-text)]">Skills</h3>
-              <p className="text-xs text-[var(--color-text-placeholder)]">Master skills used across all opportunities</p>
+              <h3 className="text-sm font-semibold text-[var(--color-text)]">{t("Skills")}</h3>
+              <p className="text-xs text-[var(--color-text-placeholder)]">{t("Master skills used across all opportunities")}</p>
             </div>
             <div className="p-4">
               <textarea
                 className="input min-h-[80px] font-mono text-sm"
-                placeholder="Python, JavaScript, SQL, React, Docker, AWS..."
+                placeholder={t("Python, JavaScript, SQL, React, Docker, AWS...")}
                 value={skills}
                 onChange={(e) => setSkills(e.target.value)}
               />
-              <p className="mt-1 text-xs text-[var(--color-text-placeholder)]">{skillCount} skills detected</p>
+              <p className="mt-1 text-xs text-[var(--color-text-placeholder)]">{skillCount} {t("skills detected")}</p>
             </div>
           </section>
 
@@ -143,12 +145,12 @@ export function ProfilePage() {
           <section className="border border-[var(--color-border)] bg-[var(--color-surface)]">
             <div className="flex items-center justify-between border-b border-[var(--color-border)] px-4 py-2.5">
               <div>
-                <h3 className="text-sm font-semibold text-[var(--color-text)]">Experience</h3>
-                <p className="text-xs text-[var(--color-text-placeholder)]">{experiences.length} entries</p>
+                <h3 className="text-sm font-semibold text-[var(--color-text)]">{t("Experience")}</h3>
+                <p className="text-xs text-[var(--color-text-placeholder)]">{experiences.length} {t("entries")}</p>
               </div>
               <button type="button" onClick={addExperience} className="btn btn-ghost text-xs">
                 <Plus className="h-3.5 w-3.5" />
-                Add entry
+                {t("Add entry")}
               </button>
             </div>
             <div className="divide-y divide-[var(--color-border)]">
@@ -157,7 +159,7 @@ export function ProfilePage() {
                   <div className="flex items-start gap-2">
                     <input
                       className="input flex-1 text-sm"
-                      placeholder="Job title"
+                      placeholder={t("Job title")}
                       value={exp.title}
                       onChange={(e) => updateExperience(idx, 'title', e.target.value)}
                     />
@@ -171,13 +173,13 @@ export function ProfilePage() {
                   </div>
                   <textarea
                     className="input mt-2 min-h-[60px] text-sm"
-                    placeholder="Description"
+                    placeholder={t("Description")}
                     value={exp.description}
                     onChange={(e) => updateExperience(idx, 'description', e.target.value)}
                   />
                   <input
                     className="input mt-2 text-sm"
-                    placeholder="Confirmed metrics (comma-separated)"
+                    placeholder={t("Confirmed metrics (comma-separated)")}
                     value={exp.confirmed_metrics.join(', ')}
                     onChange={(e) =>
                       updateExperience(
@@ -191,7 +193,7 @@ export function ProfilePage() {
               ))}
               {experiences.length === 0 && (
                 <p className="px-4 py-6 text-center text-sm text-[var(--color-text-placeholder)]">
-                  No experience entries yet.
+                  {t("No experience entries yet.")}
                 </p>
               )}
             </div>
@@ -214,10 +216,10 @@ export function ProfilePage() {
 
       {tailoredResult && (
         <section className="border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
-          <h3 className="mb-3 text-sm font-semibold text-[var(--color-text)]">Tailored profile</h3>
+          <h3 className="mb-3 text-sm font-semibold text-[var(--color-text)]">{t("Tailored profile")}</h3>
           <div className="space-y-3">
             <div>
-              <p className="mb-1.5 text-xs font-medium uppercase tracking-wider text-[var(--color-text-placeholder)]">Tailored skills</p>
+              <p className="mb-1.5 text-xs font-medium uppercase tracking-wider text-[var(--color-text-placeholder)]">{t("Tailored skills")}</p>
               <div className="flex flex-wrap gap-1.5">
                 {tailoredResult.tailored_skills.map((skill, i) => (
                   <Badge key={i} variant="success">{skill}</Badge>
@@ -226,7 +228,7 @@ export function ProfilePage() {
             </div>
             {tailoredResult.tailored_experience.length > 0 && (
               <div>
-                <p className="mb-1.5 text-xs font-medium uppercase tracking-wider text-[var(--color-text-placeholder)]">Tailored experience</p>
+                <p className="mb-1.5 text-xs font-medium uppercase tracking-wider text-[var(--color-text-placeholder)]">{t("Tailored experience")}</p>
                 <div className="divide-y divide-[var(--color-border)] border border-[var(--color-border)]">
                   {tailoredResult.tailored_experience.map((exp, i) => (
                     <div key={i} className="px-3 py-2">

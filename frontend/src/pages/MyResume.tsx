@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useI18n } from '../i18n/hooks'
 import { Award, CheckCircle2, FileText, FolderKanban, GraduationCap, Search, Sparkles, XCircle } from 'lucide-react'
 import type { ResumeSnapshot } from '../api/careerTypes'
 import { careerService } from '../services/careerService'
@@ -12,6 +13,7 @@ import { SectionHeading } from '../components/career/SectionHeading'
 import { useToast } from '../hooks/useToast'
 
 export function MyResumePage() {
+  const { t } = useI18n()
   const { add } = useToast()
   const [resume, setResume] = useState<ResumeSnapshot | null>(null)
   const [loading, setLoading] = useState(true)
@@ -30,23 +32,23 @@ export function MyResumePage() {
     try {
       if (action === 'analyze') await careerService.analyzeResume()
       else await careerService.improveResume()
-      add('success', action === 'analyze' ? 'Resume analysis requested' : 'Resume improvement requested')
+      add('success', action === 'analyze' ? t('Resume analysis requested') : t('Resume improvement requested'))
     } catch {
-      add('error', 'Action unavailable right now')
+      add('error', t('Action unavailable right now'))
     } finally {
       setWorking(false)
     }
   }
 
-  if (loading) return <LoadingState label="Loading resume..." />
-  if (error || !resume) return <ErrorState title="Unable to load resume" description="Please try again later." />
+  if (loading) return <LoadingState label={t("Loading resume...")} />
+  if (error || !resume) return <ErrorState title={t("Unable to load resume")} description={t("Please try again later.")} />
 
   return (
     <div className="space-y-6">
       <SectionHeading
         eyebrow="Career Intelligence"
-        title="My Resume"
-        description="Review the resume Clario is using as the current source of career evidence."
+        title={t("My Resume")}
+        description={t("Review the resume Clario is using as the current source of career evidence.")}
       />
 
       <div className="grid gap-5 xl:grid-cols-[1.5fr_0.5fr]">
@@ -55,21 +57,21 @@ export function MyResumePage() {
             <div className="flex gap-4">
               <div className="rounded-[var(--radius-md)] bg-[var(--color-accent-soft)] p-3 text-[var(--color-accent-text)]"><FileText className="h-6 w-6" /></div>
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-text-muted)]">Resume file</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-text-muted)]">{t("Resume file")}</p>
                 <h2 className="mt-1 font-semibold text-[var(--color-text)]">{resume.fileName}</h2>
                 <p className="mt-1 text-sm text-[var(--color-text-muted)]">{resume.updatedAt}</p>
               </div>
             </div>
-            <Badge variant="success">Current</Badge>
+            <Badge variant="success">{t("Current")}</Badge>
           </div>
           <div className="mt-6 flex flex-wrap gap-3">
-            <Button onClick={() => handleAction('analyze')} loading={working}><Search className="h-4 w-4" />Analyze Resume</Button>
-            <Button variant="secondary" onClick={() => handleAction('improve')} loading={working}><Sparkles className="h-4 w-4" />Improve Resume</Button>
+            <Button onClick={() => handleAction('analyze')} loading={working}><Search className="h-4 w-4" />{t("Analyze Resume")}</Button>
+            <Button variant="secondary" onClick={() => handleAction('improve')} loading={working}><Sparkles className="h-4 w-4" />{t("Improve Resume")}</Button>
           </div>
         </Card>
 
         <Card className="p-5 sm:p-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-text-muted)]">Resume score</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-text-muted)]">{t("Resume score")}</p>
           <div className="mt-2 flex items-baseline gap-1">
             <span className="text-4xl font-semibold tracking-tight text-[var(--color-text)]">{resume.score}</span>
             <span className="text-sm text-[var(--color-text-muted)]">/100</span>
@@ -82,18 +84,18 @@ export function MyResumePage() {
 
       <div className="grid gap-5 lg:grid-cols-2">
         <Card className="p-5">
-          <h2 className="font-semibold">Skills</h2>
+          <h2 className="font-semibold">{t("Skills")}</h2>
           <div className="mt-4"><TagList items={resume.skills} variant="accent" /></div>
         </Card>
         <Card className="p-5">
-          <h2 className="font-semibold">Certifications</h2>
+          <h2 className="font-semibold">{t("Certifications")}</h2>
           <div className="mt-4"><TagList items={resume.certifications} variant="info" /></div>
         </Card>
       </div>
 
       <div className="grid gap-5 xl:grid-cols-2">
         <Card className="p-5">
-          <div className="flex items-center gap-2"><FileText className="h-4 w-4 text-[var(--color-accent-text)]" /><h2 className="font-semibold">Experience</h2></div>
+          <div className="flex items-center gap-2"><FileText className="h-4 w-4 text-[var(--color-accent-text)]" /><h2 className="font-semibold">{t("Experience")}</h2></div>
           <div className="mt-4 space-y-5">
             {resume.experience.map((item) => (
               <div key={item.id}>
@@ -107,7 +109,7 @@ export function MyResumePage() {
           </div>
         </Card>
         <Card className="p-5">
-          <div className="flex items-center gap-2"><FolderKanban className="h-4 w-4 text-[var(--color-accent-text)]" /><h2 className="font-semibold">Projects</h2></div>
+          <div className="flex items-center gap-2"><FolderKanban className="h-4 w-4 text-[var(--color-accent-text)]" /><h2 className="font-semibold">{t("Projects")}</h2></div>
           <div className="mt-4 space-y-4">
             {resume.projects.map((item) => (
               <div key={item.id} className="rounded-[var(--radius-md)] bg-[var(--color-surface-secondary)] p-4">
@@ -123,18 +125,18 @@ export function MyResumePage() {
       <Card className="p-5">
         <div className="grid gap-5 md:grid-cols-2">
           <div>
-            <div className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-[var(--color-success-text)]" /><h2 className="font-semibold">Strengths</h2></div>
+            <div className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-[var(--color-success-text)]" /><h2 className="font-semibold">{t("Strengths")}</h2></div>
             <ul className="mt-4 space-y-3">{resume.strengths.map((item) => <li key={item} className="text-sm leading-6 text-[var(--color-text-secondary)]">{item}</li>)}</ul>
           </div>
           <div>
-            <div className="flex items-center gap-2"><XCircle className="h-4 w-4 text-[var(--color-error-text)]" /><h2 className="font-semibold">Weaknesses</h2></div>
+            <div className="flex items-center gap-2"><XCircle className="h-4 w-4 text-[var(--color-error-text)]" /><h2 className="font-semibold">{t("Weaknesses")}</h2></div>
             <ul className="mt-4 space-y-3">{resume.weaknesses.map((item) => <li key={item} className="text-sm leading-6 text-[var(--color-text-secondary)]">{item}</li>)}</ul>
           </div>
         </div>
       </Card>
 
       <Card className="p-5">
-        <div className="flex items-center gap-2"><Award className="h-4 w-4 text-[var(--color-warning-text)]" /><h2 className="font-semibold">Missing Evidence</h2></div>
+        <div className="flex items-center gap-2"><Award className="h-4 w-4 text-[var(--color-warning-text)]" /><h2 className="font-semibold">{t("Missing Evidence")}</h2></div>
         <ul className="mt-4 space-y-3">
           {resume.missingEvidence.map((item) => <li key={item} className="text-sm leading-6 text-[var(--color-text-secondary)]">{item}</li>)}
         </ul>

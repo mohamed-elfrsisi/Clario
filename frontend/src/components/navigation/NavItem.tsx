@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import type { NavLinkItem } from '../../config/navigation'
+import { useI18n } from '../../i18n/hooks'
 
 interface NavItemProps {
   item: NavLinkItem
@@ -9,10 +10,14 @@ interface NavItemProps {
 }
 
 export function NavItem({ item, compact = false, badge, onNavigate }: NavItemProps) {
+  const { t } = useI18n()
+  const labelKey = item.label === 'Dashboard' ? 'nav.dashboard' : item.label === 'My Resume' ? 'nav.resume' : item.label === 'Career Profile' ? 'nav.profile' : item.label === 'Career Target' ? 'nav.target' : item.label === 'Opportunities' ? 'nav.opportunities' : item.label === 'Applications' ? 'nav.applications' : item.label === 'Mock Interviews' ? 'nav.interviews' : item.label === 'Career Analytics' ? 'nav.analytics' : item.label === 'Settings' ? 'nav.settings' : null
+  const label = labelKey ? t(labelKey) : item.label
+
   return (
     <NavLink
       to={item.to}
-      title={item.label}
+      title={label}
       onClick={onNavigate}
       end={item.to === '/dashboard'}
       className={({ isActive }) =>
@@ -30,7 +35,7 @@ export function NavItem({ item, compact = false, badge, onNavigate }: NavItemPro
       }
     >
       <item.icon className={compact ? 'h-[18px] w-[18px]' : 'h-[17px] w-[17px] flex-shrink-0'} />
-      {!compact && <span className="min-w-0 flex-1 truncate">{item.label}</span>}
+      {!compact && <span className="min-w-0 flex-1 truncate">{label}</span>}
       {!compact && badge != null && badge > 0 && (
         <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--color-surface-tertiary)] px-1.5 text-[10px] font-semibold text-[var(--color-text-secondary)]">
           {badge}

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useI18n } from '../i18n/hooks'
 import { ArrowRight, Check, Sparkles } from 'lucide-react'
 import type { CareerTarget as CareerTargetData } from '../api/careerTypes'
 import { careerService } from '../services/careerService'
@@ -13,6 +14,7 @@ import { ErrorState } from '../components/ui/ErrorState'
 import { useToast } from '../hooks/useToast'
 
 export function CareerTargetPage() {
+  const { t } = useI18n()
   const { add } = useToast()
   const [target, setTarget] = useState<CareerTargetData | null>(null)
   const [input, setInput] = useState('')
@@ -62,34 +64,34 @@ export function CareerTargetPage() {
     try {
       const saved = await careerService.updateTarget(target)
       setTarget(saved)
-      add('success', 'Career target saved')
+      add('success', t('Career target saved'))
     } catch {
-      add('error', 'Unable to save career target')
+      add('error', t('Unable to save career target'))
     } finally {
       setSaving(false)
     }
   }
 
-  if (loading) return <LoadingState label="Loading career target..." />
-  if (error || !target) return <ErrorState title="Unable to load career target" description="Please try again later." />
+  if (loading) return <LoadingState label={t("Loading career target...")} />
+  if (error || !target) return <ErrorState title={t("Unable to load career target")} description={t("Please try again later.")} />
 
   return (
     <div className="space-y-6">
       <SectionHeading
         eyebrow="Career Intelligence"
-        title="Career Target"
-        description="Define where you want to go. Clario can use this target as the reference point for your profile, resume, and opportunities."
+        title={t("Career Target")}
+        description={t("Define where you want to go. Clario can use this target as the reference point for your profile, resume, and opportunities.")}
       />
 
       <Card className="p-5 sm:p-6">
         <div className="flex items-start gap-3">
           <div className="rounded-full bg-[var(--color-accent-soft)] p-2 text-[var(--color-accent-text)]"><Sparkles className="h-4 w-4" /></div>
           <div className="min-w-0 flex-1">
-            <h2 className="font-semibold text-[var(--color-text)]">Describe your target naturally</h2>
-            <p className="mt-1 text-sm text-[var(--color-text-secondary)]">For example: “I want to become a Machine Learning Engineer.”</p>
+            <h2 className="font-semibold text-[var(--color-text)]">{t("Describe your target naturally")}</h2>
+            <p className="mt-1 text-sm text-[var(--color-text-secondary)]">{t("For example: “I want to become a Machine Learning Engineer.”")}</p>
             <div className="mt-4 flex flex-col gap-3 sm:flex-row">
-              <Input value={input} onChange={(e) => setInput(e.target.value)} aria-label="Natural language career target" />
-              <Button onClick={normalize} loading={normalizing} className="shrink-0"><ArrowRight className="h-4 w-4" />Normalize target</Button>
+              <Input value={input} onChange={(e) => setInput(e.target.value)} aria-label={t("Natural language career target")} />
+              <Button onClick={normalize} loading={normalizing} className="shrink-0"><ArrowRight className="h-4 w-4" />{t("Normalize target")}</Button>
             </div>
           </div>
         </div>
@@ -99,44 +101,44 @@ export function CareerTargetPage() {
         <Card className="p-5 sm:p-6">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-text-muted)]">Normalized target</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-text-muted)]">{t("Normalized target")}</p>
               <h2 className="mt-2 text-2xl font-semibold text-[var(--color-text)]">{target.normalizedRole}</h2>
               <p className="mt-1 text-sm text-[var(--color-text-secondary)]">{target.domain}</p>
             </div>
           </div>
 
           <div className="mt-6 grid gap-5 md:grid-cols-2">
-            <Input label="Target Role" value={target.targetRole} onChange={(e) => update('targetRole', e.target.value)} />
-            <Input label="Target Industry" value={target.targetIndustry} onChange={(e) => update('targetIndustry', e.target.value)} />
-            <Input label="Target Domain" value={target.targetDomain} onChange={(e) => update('targetDomain', e.target.value)} />
-            <Input label="Target Seniority" value={target.targetSeniority} onChange={(e) => update('targetSeniority', e.target.value)} />
-            <Input label="Target Location" value={target.targetLocation} onChange={(e) => update('targetLocation', e.target.value)} />
+            <Input label={t("Target Role")} value={target.targetRole} onChange={(e) => update('targetRole', e.target.value)} />
+            <Input label={t("Target Industry")} value={target.targetIndustry} onChange={(e) => update('targetIndustry', e.target.value)} />
+            <Input label={t("Target Domain")} value={target.targetDomain} onChange={(e) => update('targetDomain', e.target.value)} />
+            <Input label={t("Target Seniority")} value={target.targetSeniority} onChange={(e) => update('targetSeniority', e.target.value)} />
+            <Input label={t("Target Location")} value={target.targetLocation} onChange={(e) => update('targetLocation', e.target.value)} />
           </div>
 
           <div className="mt-6 grid gap-6 md:grid-cols-2">
             <div>
-              <p className="mb-3 text-sm font-medium text-[var(--color-text)]">Core Skills</p>
+              <p className="mb-3 text-sm font-medium text-[var(--color-text)]">{t("Core Skills")}</p>
               <TagList items={target.coreSkills} variant="accent" />
             </div>
             <div>
-              <p className="mb-3 text-sm font-medium text-[var(--color-text)]">Technologies</p>
+              <p className="mb-3 text-sm font-medium text-[var(--color-text)]">{t("Technologies")}</p>
               <TagList items={target.technologies} variant="info" />
             </div>
           </div>
 
           <div className="mt-6 grid gap-6 md:grid-cols-2">
             <div>
-              <p className="mb-3 text-sm font-medium text-[var(--color-text)]">Target Skills</p>
+              <p className="mb-3 text-sm font-medium text-[var(--color-text)]">{t("Target Skills")}</p>
               <TagList items={target.targetSkills} />
             </div>
             <div>
-              <p className="mb-3 text-sm font-medium text-[var(--color-text)]">Target Technologies</p>
+              <p className="mb-3 text-sm font-medium text-[var(--color-text)]">{t("Target Technologies")}</p>
               <TagList items={target.targetTechnologies} />
             </div>
           </div>
 
           <div className="mt-6">
-            <p className="mb-3 text-sm font-medium text-[var(--color-text)]">Target Responsibilities</p>
+            <p className="mb-3 text-sm font-medium text-[var(--color-text)]">{t("Target Responsibilities")}</p>
             <ul className="space-y-2">
               {target.targetResponsibilities.map((item) => (
                 <li key={item} className="flex gap-2 text-sm leading-6 text-[var(--color-text-secondary)]">
@@ -147,19 +149,19 @@ export function CareerTargetPage() {
           </div>
 
           <div className="mt-7 flex justify-end">
-            <Button onClick={save} loading={saving}>Save target</Button>
+            <Button onClick={save} loading={saving}>{t("Save target")}</Button>
           </div>
         </Card>
 
         <Card className="h-fit p-5 sm:p-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-text-muted)]">Current target progress</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-text-muted)]">{t("Current target progress")}</p>
           <div className="mt-3 flex items-end gap-2">
             <span className="text-4xl font-semibold tracking-tight text-[var(--color-text)]">{target.progress}%</span>
-            <span className="pb-1 text-sm text-[var(--color-text-muted)]">aligned</span>
+            <span className="pb-1 text-sm text-[var(--color-text-muted)]">{t("aligned")}</span>
           </div>
           <div className="mt-5"><ProgressBar value={target.progress} /></div>
           <p className="mt-4 text-sm leading-6 text-[var(--color-text-secondary)]">
-            Progress is a UI value for now. The real calculation will come from the career intelligence backend.
+            {t("Progress is a UI value for now. The real calculation will come from the career intelligence backend.")}
           </p>
         </Card>
       </div>

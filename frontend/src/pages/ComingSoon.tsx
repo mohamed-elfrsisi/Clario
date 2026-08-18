@@ -1,8 +1,10 @@
 import { ArrowLeft, Sparkles } from 'lucide-react'
+import { useI18n } from '../i18n/hooks'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { pageDescriptions, pageTitles } from '../config/navigation'
 
 export function ComingSoonPage() {
+  const { t } = useI18n()
   const navigate = useNavigate()
   const location = useLocation()
   const title = pageTitles[location.pathname] ?? 'Career Module'
@@ -15,7 +17,7 @@ export function ComingSoonPage() {
           <Sparkles className="h-5 w-5" />
         </div>
         <p className="mt-5 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-accent-text)]">
-          Next phase
+          {t("Next phase")}
         </p>
         <h1 className="mt-2 text-2xl font-semibold">{title}</h1>
         <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[var(--color-text-secondary)]">
@@ -27,7 +29,7 @@ export function ComingSoonPage() {
           className="mt-6 inline-flex items-center gap-2 rounded-lg bg-[var(--color-accent)] px-4 py-2.5 text-sm font-semibold text-[var(--color-accent-contrast)] hover:bg-[var(--color-accent-hover)]"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to dashboard
+          {t("Back to dashboard")}
         </button>
       </div>
     </div>
