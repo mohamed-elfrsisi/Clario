@@ -1,28 +1,50 @@
-import { useState, useEffect, useMemo } from 'react'
-import { Briefcase, Plus, Trash2, Search } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { ArrowRight, Briefcase, Building2, CalendarDays, Plus, Search, Trash2 } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { api } from '../api/client'
 import type { Opportunity } from '../api/types'
 import { useToast } from '../hooks/useToast'
 import { pageDescriptions } from '../config/navigation'
-import { Table, TableHead, TableHeaderCell, TableBody, TableRow, TableCell } from '../components/ui/Table'
-import { Badge } from '../components/ui/Badge'
-import { EmptyState } from '../components/ui/EmptyState'
+import { Badge, Button, Card, EmptyState, Input, LoadingState } from '../components/ui/ui'
+
+interface OpportunityMeta {
+  company: string
+  opportunityFit?: number
+  careerAlignment?: number
+  analyzedAt?: string
+  jobUrl?: string
+}
+
+const META_KEY = 'clario-opportunity-meta'
+
+function readMeta(): Record<string, OpportunityMeta> {
+  try {
+    return JSON.parse(localStorage.getItem(META_KEY) ?? '{}') as Record<string, OpportunityMeta>
+  } catch {
+    return {}
+  }
+}
+
+function writeMeta(meta: Record<string, OpportunityMeta>) {
+  localStorage.setItem(META_KEY, JSON.stringify(meta))
+}
+
+function formatDate(value?: string) {
+  if (!value) return 'Not analyzed'
+  return new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(value))
+}
 
 export function OpportunitiesPage() {
   const { add } = useToast()
   const [opportunities, setOpportunities] = useState<Opportunity[]>([])
+  const [meta, setMeta] = useState<Record<string, OpportunityMeta>>(readMeta)
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [formLoading, setFormLoading] = useState(false)
+  const [form, setForm] = useState({ company: '', title: '', text: '', jobUrl: '' })
 
-  const [form, setForm] = useState({
-    text: '',
-    title: '',
-    region: '',
-    role_type: '',
-  })
-
-  const loadOpportunities = async () => {
+  const loadOpportunities = useCallback(async () => {
     setLoading(true)
     try {
       const res = await api.listOpportunities(0, 50)
@@ -32,47 +54,55 @@ export function OpportunitiesPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [add])
 
   useEffect(() => {
-    loadOpportunities()
-  }, [])
+    void loadOpportunities()
+  }, [loadOpportunities])
 
   const filtered = useMemo(() => {
     if (!searchQuery.trim()) return opportunities
     const q = searchQuery.toLowerCase()
-    return opportunities.filter(
-      (o) =>
-        o.title?.toLowerCase().includes(q) ||
-        o.role_type?.toLowerCase().includes(q) ||
-        o.region?.toLowerCase().includes(q)
-    )
-  }, [opportunities, searchQuery])
+    return opportunities.filter((opportunity) => {
+      const saved = meta[opportunity.opportunity_id]
+      return [opportunity.title, opportunity.role_type, opportunity.region, saved?.company]
+        .filter(Boolean)
+        .some((value) => value!.toLowerCase().includes(q))
+    })
+  }, [meta, opportunities, searchQuery])
 
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!form.text.trim()) {
-      add('error', 'Opportunity text is required')
+  const handleCreate = async (event: React.FormEvent) => {
+    event.preventDefault()
+    if (!form.title.trim() || !form.company.trim() || !form.text.trim()) {
+      add('error', 'Job title, company, and job description are required')
       return
     }
 
-    setLoading(true)
+    setFormLoading(true)
     try {
-      await api.createOpportunity({
+      const response = await api.createOpportunity({
         text: form.text,
-        title: form.title || undefined,
-        region: form.region || undefined,
-        role_type: form.role_type || undefined,
+        title: form.title,
       })
-      add('success', 'Opportunity created')
+      const created = response.data as Opportunity
+      const nextMeta = {
+        ...meta,
+        [created.opportunity_id]: {
+          company: form.company.trim(),
+          ...(form.jobUrl.trim() ? { jobUrl: form.jobUrl.trim() } : {}),
+        },
+      }
+      setMeta(nextMeta)
+      writeMeta(nextMeta)
+      add('success', 'Opportunity saved')
       setShowForm(false)
-      setForm({ text: '', title: '', region: '', role_type: '' })
-      loadOpportunities()
+      setForm({ company: '', title: '', text: '', jobUrl: '' })
+      await loadOpportunities()
     } catch (err: unknown) {
       const detail = (err as { response?: { data?: { detail?: string } } }).response?.data?.detail || 'Failed to create opportunity'
       add('error', detail)
     } finally {
-      setLoading(false)
+      setFormLoading(false)
     }
   }
 
@@ -80,147 +110,178 @@ export function OpportunitiesPage() {
     if (!window.confirm('Delete this opportunity?')) return
     try {
       await api.deleteOpportunity(id)
+      const nextMeta = { ...meta }
+      delete nextMeta[id]
+      setMeta(nextMeta)
+      writeMeta(nextMeta)
       add('success', 'Opportunity deleted')
-      loadOpportunities()
+      await loadOpportunities()
     } catch {
       add('error', 'Failed to delete opportunity')
     }
   }
 
   return (
-    <div className="space-y-5">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <p className="text-xs font-medium uppercase tracking-wider text-slate-400">Workspace</p>
-          <h2 className="mt-1 text-lg font-semibold text-slate-900">Opportunities</h2>
-          <p className="mt-0.5 text-sm text-slate-500">{pageDescriptions['/opportunities']}</p>
+    <div className="space-y-7">
+      <section className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="max-w-2xl">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-accent-text)]">Career intelligence</p>
+          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-[var(--color-text)] sm:text-3xl">Opportunities</h1>
+          <p className="mt-2 text-sm leading-6 text-[var(--color-text-secondary)]">{pageDescriptions['/opportunities']}. Compare fit with the career direction you are building toward.</p>
         </div>
-        <button onClick={() => setShowForm(!showForm)} className="btn btn-primary text-xs">
-          <Plus className="h-3.5 w-3.5" />
-          Add opportunity
-        </button>
-      </div>
+        <Button onClick={() => setShowForm((current) => !current)} size="sm">
+          <Plus className="h-4 w-4" />
+          {showForm ? 'Close' : 'Add opportunity'}
+        </Button>
+      </section>
 
       {showForm && (
-        <div className="border border-slate-200 bg-white p-4">
-          <h3 className="mb-3 text-sm font-semibold text-slate-900">New opportunity</h3>
-          <form onSubmit={handleCreate} className="space-y-3">
-            <div>
-              <label className="label">Title <span className="text-slate-400">(optional)</span></label>
-              <input
-                type="text"
-                className="input"
-                placeholder="e.g. Senior Frontend Engineer"
-                value={form.title}
-                onChange={(e) => setForm({ ...form, title: e.target.value })}
-              />
+        <Card className="p-5 sm:p-6">
+          <div className="mb-5 flex items-start gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--radius-md)] bg-[var(--color-accent-soft)] text-[var(--color-accent-text)]">
+              <Briefcase className="h-5 w-5" />
             </div>
             <div>
-              <label className="label">Full description *</label>
+              <h2 className="text-base font-semibold text-[var(--color-text)]">Add an opportunity</h2>
+              <p className="mt-1 text-sm text-[var(--color-text-secondary)]">Save the role you are considering. Analysis can be run once your profile and resume are ready.</p>
+            </div>
+          </div>
+
+          <form onSubmit={handleCreate} className="space-y-5">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Input
+                label="Job title"
+                placeholder="Machine Learning Intern"
+                value={form.title}
+                onChange={(event) => setForm({ ...form, title: event.target.value })}
+                required
+              />
+              <Input
+                label="Company"
+                placeholder="NVIDIA"
+                value={form.company}
+                onChange={(event) => setForm({ ...form, company: event.target.value })}
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="job-description" className="mb-1.5 block text-sm font-medium text-[var(--color-text)]">Job description</label>
               <textarea
-                className="input min-h-[100px] resize-y"
+                id="job-description"
+                required
+                rows={7}
                 placeholder="Paste the full job description here..."
                 value={form.text}
-                onChange={(e) => setForm({ ...form, text: e.target.value })}
+                onChange={(event) => setForm({ ...form, text: event.target.value })}
+                className="w-full resize-y rounded-[var(--radius-md)] border border-[var(--color-input-border)] bg-[var(--color-input-bg)] px-3 py-3 text-sm leading-6 text-[var(--color-text)] placeholder:text-[var(--color-text-placeholder)] focus:border-[var(--color-focus)] focus:outline-none focus:ring-2 focus:ring-[var(--color-focus-ring)]"
               />
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="label">Region</label>
-                <input
-                  type="text"
-                  className="input"
-                  placeholder="e.g. US, UK"
-                  value={form.region}
-                  onChange={(e) => setForm({ ...form, region: e.target.value })}
-                />
-              </div>
-              <div>
-                <label className="label">Role type</label>
-                <input
-                  type="text"
-                  className="input"
-                  placeholder="e.g. Full-time"
-                  value={form.role_type}
-                  onChange={(e) => setForm({ ...form, role_type: e.target.value })}
-                />
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <button type="submit" disabled={loading} className="btn btn-primary text-xs">
-                {loading ? 'Creating...' : 'Create opportunity'}
-              </button>
-              <button type="button" onClick={() => setShowForm(false)} className="btn btn-secondary text-xs">
-                Cancel
-              </button>
+
+            <Input
+              label="Job URL"
+              hint="Optional — ready for backend URL support later."
+              type="url"
+              placeholder="https://company.com/jobs/..."
+              value={form.jobUrl}
+              onChange={(event) => setForm({ ...form, jobUrl: event.target.value })}
+            />
+
+            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+              <Button type="button" variant="secondary" size="sm" onClick={() => setShowForm(false)}>Cancel</Button>
+              <Button type="submit" size="sm" loading={formLoading}>Save opportunity</Button>
             </div>
           </form>
-        </div>
+        </Card>
       )}
 
-      {/* Search */}
-      {opportunities.length > 0 && (
-        <div className="relative max-w-xs">
-          <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
-          <input
-            type="search"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Filter opportunities..."
-            className="input pl-8 text-sm"
-          />
+      <section className="space-y-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-base font-semibold text-[var(--color-text)]">Saved opportunities</h2>
+            <p className="mt-1 text-sm text-[var(--color-text-secondary)]">Your roles, with profile fit and career direction kept separate.</p>
+          </div>
+          {opportunities.length > 0 && (
+            <div className="w-full sm:w-72">
+              <Input
+                aria-label="Filter opportunities"
+                placeholder="Filter opportunities..."
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                leading={<Search className="h-4 w-4" />}
+              />
+            </div>
+          )}
         </div>
-      )}
 
-      {loading ? (
-        <div className="flex items-center justify-center border border-slate-200 bg-white py-16">
-          <span className="h-5 w-5 animate-spin rounded-full border-2 border-slate-300 border-t-indigo-600" />
-        </div>
-      ) : opportunities.length === 0 ? (
-        <div className="border border-slate-200 bg-white">
-          <EmptyState
-            icon={Briefcase}
-            title="No opportunities yet"
-            description="Add a job description to analyze how well your resume matches."
-            action={
-              <button onClick={() => setShowForm(true)} className="btn btn-primary text-xs">
-                Add your first opportunity
-              </button>
-            }
-          />
-        </div>
-      ) : (
-        <Table>
-          <TableHead>
-            <TableHeaderCell>Job</TableHeaderCell>
-            <TableHeaderCell>Role Type</TableHeaderCell>
-            <TableHeaderCell>Region</TableHeaderCell>
-            <TableHeaderCell>Status</TableHeaderCell>
-            <TableHeaderCell className="text-right">Actions</TableHeaderCell>
-          </TableHead>
-          <TableBody>
-            {filtered.map((opp) => (
-              <TableRow key={opp.opportunity_id}>
-                <TableCell className="font-medium text-slate-900">
-                  {opp.title || 'Untitled opportunity'}
-                </TableCell>
-                <TableCell className="text-slate-500">{opp.role_type || '—'}</TableCell>
-                <TableCell className="text-slate-500">{opp.region || '—'}</TableCell>
-                <TableCell><Badge variant="info">Active</Badge></TableCell>
-                <TableCell className="text-right">
-                  <button
-                    onClick={() => handleDelete(opp.opportunity_id)}
-                    className="inline-flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-red-600"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                    Delete
-                  </button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      )}
+        {loading ? (
+          <Card><LoadingState label="Loading opportunities..." /></Card>
+        ) : opportunities.length === 0 ? (
+          <Card>
+            <EmptyState
+              icon={Briefcase}
+              title="No opportunities yet"
+              description="Add a role to start understanding how it fits your current profile and career target."
+              action={<Button size="sm" onClick={() => setShowForm(true)}><Plus className="h-4 w-4" /> Add your first opportunity</Button>}
+            />
+          </Card>
+        ) : filtered.length === 0 ? (
+          <Card>
+            <EmptyState icon={Search} title="No matching opportunities" description="Try a different company or role search." />
+          </Card>
+        ) : (
+          <div className="grid gap-4 lg:grid-cols-2">
+            {filtered.map((opportunity) => {
+              const saved = meta[opportunity.opportunity_id]
+              return (
+                <Card key={opportunity.opportunity_id} className="p-5 transition-shadow hover:shadow-[var(--shadow-md)]">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 text-xs text-[var(--color-text-muted)]">
+                        <Building2 className="h-3.5 w-3.5" />
+                        <span className="truncate">{saved?.company || 'Company not set'}</span>
+                      </div>
+                      <h3 className="mt-2 truncate text-lg font-semibold text-[var(--color-text)]">{opportunity.title || 'Untitled opportunity'}</h3>
+                    </div>
+                    <Badge variant="success">Active</Badge>
+                  </div>
+
+                  <div className="mt-5 grid grid-cols-2 gap-3">
+                    <div className="rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface-secondary)] p-3">
+                      <p className="text-xs font-medium text-[var(--color-text-muted)]">Opportunity Fit</p>
+                      <p className="mt-1 text-2xl font-semibold tabular-nums text-[var(--color-text)]">{saved?.opportunityFit != null ? `${saved.opportunityFit}/100` : '—'}</p>
+                      <p className="mt-1 text-xs text-[var(--color-text-secondary)]">Current profile match</p>
+                    </div>
+                    <div className="rounded-[var(--radius-md)] border border-[var(--color-accent-border)] bg-[var(--color-accent-soft)] p-3">
+                      <p className="text-xs font-medium text-[var(--color-accent-text)]">Career Alignment</p>
+                      <p className="mt-1 text-2xl font-semibold tabular-nums text-[var(--color-text)]">{saved?.careerAlignment != null ? `${saved.careerAlignment}/100` : '—'}</p>
+                      <p className="mt-1 text-xs text-[var(--color-text-secondary)]">Target direction</p>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 flex flex-col gap-3 border-t border-[var(--color-border)] pt-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-center gap-2 text-xs text-[var(--color-text-muted)]">
+                      <CalendarDays className="h-3.5 w-3.5" />
+                      <span>{formatDate(saved?.analyzedAt)}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button variant="ghost" size="sm" onClick={() => handleDelete(opportunity.opportunity_id)} aria-label={`Delete ${opportunity.title || 'opportunity'}`}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                      <Link to={`/analysis?opportunity=${opportunity.opportunity_id}`}>
+                        <Button variant="secondary" size="sm">
+                          View analysis
+                          <ArrowRight className="h-4 w-4" />
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                </Card>
+              )
+            })}
+          </div>
+        )}
+      </section>
     </div>
   )
 }
