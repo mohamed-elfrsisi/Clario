@@ -16,6 +16,10 @@ import { CareerProfilePage } from './pages/CareerProfile'
 import { CareerTargetPage } from './pages/CareerTarget'
 import { MyResumePage } from './pages/MyResume'
 import { ComingSoonPage } from './pages/ComingSoon'
+import { MockInterviewsPage } from './pages/MockInterviews'
+import { InterviewSetupPage } from './pages/InterviewSetup'
+import { InterviewSessionPage } from './pages/InterviewSession'
+import { InterviewResultsPage } from './pages/InterviewResults'
 import { useAuth } from './auth/context'
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
@@ -146,8 +150,44 @@ export default function App() {
               </ProtectedRoute>
             } />
 
+            <Route path="/mock-interviews" element={
+              <ProtectedRoute>
+                <Layout>
+                  <MockInterviewsPage />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/mock-interviews/setup" element={
+              <ProtectedRoute>
+                <Layout>
+                  <InterviewSetupPage />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/mock-interviews/:interviewId/session" element={
+              <ProtectedRoute>
+                <Layout>
+                  <InterviewSessionPage />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/mock-interviews/:interviewId/results" element={
+              <ProtectedRoute>
+                <Layout>
+                  <InterviewResultsPage />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/mock-interviews/:interviewId/analytics" element={
+              <ProtectedRoute>
+                <Layout>
+                  <InterviewResultsPage />
+                </Layout>
+              </ProtectedRoute>
+            } />
+
             {/* Reserved product modules */}
-            {['/applications', '/mock-interviews', '/career-analytics'].map((path) => (
+            {['/applications', '/career-analytics'].map((path) => (
               <Route
                 key={path}
                 path={path}
