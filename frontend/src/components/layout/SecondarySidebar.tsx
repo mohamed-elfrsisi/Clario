@@ -1,7 +1,8 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { secondaryNavGroups } from '../../config/navigation'
 import { NavSection } from '../navigation/NavSection'
-import { useAuth } from '../../auth/context'
+import { useAuth } from '../../auth/useAuth'
+import { BrandLogo } from '../brand/BrandLogo'
 
 interface SecondarySidebarProps {
   collapsed: boolean
@@ -36,9 +37,12 @@ export function SecondarySidebar({ collapsed, onToggle, onNavigate, mobile = fal
       }`}
     >
       <div className="flex min-h-[64px] items-center justify-between border-b border-[var(--color-border)] px-4">
-        <div className="min-w-0">
-          <p className="truncate text-sm font-semibold">Clario</p>
-          <p className="truncate text-[11px] text-[var(--color-text-muted)]">{user?.email}</p>
+        <div className="flex min-w-0 items-center gap-2.5">
+          <BrandLogo size="sm" />
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold">Clario</p>
+            <p className="truncate text-[11px] text-[var(--color-text-muted)]">{user?.email}</p>
+          </div>
         </div>
         {!mobile && (
           <button

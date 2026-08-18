@@ -1,7 +1,7 @@
 import { type ReactNode } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './auth/context'
-import { ToastProvider } from './hooks/useToast'
+import { ToastProvider } from './hooks/ToastProvider'
 import { Layout } from './components/layout/Layout'
 import { LoginPage } from './pages/Login'
 import { RegisterPage } from './pages/Register'
@@ -21,16 +21,16 @@ import { MockInterviewsPage } from './pages/MockInterviews'
 import { InterviewSetupPage } from './pages/InterviewSetup'
 import { InterviewSessionPage } from './pages/InterviewSession'
 import { InterviewResultsPage } from './pages/InterviewResults'
-import { useAuth } from './auth/context'
+import { useAuth } from './auth/useAuth'
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
   const { isAuthenticated, loading } = useAuth()
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50">
+      <div className="flex min-h-screen items-center justify-center bg-[var(--color-bg)]">
         <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
-          <p className="text-sm text-slate-500">Loading...</p>
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--color-accent)] border-t-transparent" />
+          <p className="text-sm text-[var(--color-text-muted)]">Loading...</p>
         </div>
       </div>
     )
@@ -45,10 +45,10 @@ function PublicRoute({ children }: { children: ReactNode }) {
   const { isAuthenticated, loading } = useAuth()
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50">
+      <div className="flex min-h-screen items-center justify-center bg-[var(--color-bg)]">
         <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
-          <p className="text-sm text-slate-500">Loading...</p>
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--color-accent)] border-t-transparent" />
+          <p className="text-sm text-[var(--color-text-muted)]">Loading...</p>
         </div>
       </div>
     )

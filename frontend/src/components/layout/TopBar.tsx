@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { useLocation } from 'react-router-dom'
-import { Bell, Menu, Search } from 'lucide-react'
+import { Bell, Menu, Moon, Search, Sun } from 'lucide-react'
 import { pageTitles } from '../../config/navigation'
 import { UserMenu } from './UserMenu'
+import { useTheme } from '../../hooks/useTheme'
 
 interface TopBarProps {
   onMenuClick: () => void
@@ -12,6 +13,7 @@ export function TopBar({ onMenuClick }: TopBarProps) {
   const location = useLocation()
   const [search, setSearch] = useState('')
   const title = pageTitles[location.pathname] ?? 'Clario'
+  const { isDark, toggleTheme } = useTheme()
 
   return (
     <header className="sticky top-0 z-20 flex h-14 flex-shrink-0 items-center gap-3 border-b border-[var(--color-border)] bg-[var(--color-surface)]/95 px-4 backdrop-blur sm:px-6">
@@ -48,6 +50,15 @@ export function TopBar({ onMenuClick }: TopBarProps) {
       </div>
 
       <div className="ml-auto flex items-center gap-1.5">
+        <button
+          type="button"
+          onClick={toggleTheme}
+          className="flex h-9 w-9 items-center justify-center rounded-lg text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-text)]"
+          title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+          aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+        >
+          {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+        </button>
         <button
           type="button"
           className="relative flex h-9 w-9 items-center justify-center rounded-lg text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-hover)]"

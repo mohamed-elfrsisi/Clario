@@ -1,7 +1,24 @@
 <!doctype html>
-<html lang="en" class="dark">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <script>
+      (() => {
+        try {
+          const key = 'clario-theme';
+          const saved = localStorage.getItem(key);
+          const mode = saved === 'light' || saved === 'dark' || saved === 'system' ? saved : 'light';
+          const dark = mode === 'dark' || (mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+          document.documentElement.classList.toggle('dark', dark);
+          document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+          document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+        } catch {
+          document.documentElement.classList.remove('dark');
+          document.documentElement.dataset.theme = 'light';
+          document.documentElement.style.colorScheme = 'light';
+        }
+      })();
+    </script>
 
     <meta
       name="viewport"
@@ -10,7 +27,7 @@
 
     <meta
       name="theme-color"
-      content="#0b0f19"
+      content="#FBF8F2"
     />
 
     <meta

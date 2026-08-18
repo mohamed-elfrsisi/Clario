@@ -1,12 +1,13 @@
 import { primaryNav } from '../../config/navigation'
 import { NavItem } from '../navigation/NavItem'
 import { UserMenu } from './UserMenu'
+import { BrandLogo } from '../brand/BrandLogo'
 
 export function PrimarySidebar() {
   return (
-    <aside className="hidden w-[64px] flex-shrink-0 flex-col items-center border-r border-white/10 bg-[#252421] py-4 md:flex">
-      <div className="mb-6 flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--color-accent)] text-sm font-bold text-[var(--color-accent-contrast)]">
-        C
+    <aside className="hidden w-[64px] flex-shrink-0 flex-col items-center border-r border-[var(--color-border)] bg-[var(--color-surface)] py-4 md:flex">
+      <div className="mb-6">
+        <BrandLogo size="sm" />
       </div>
 
       <nav aria-label="Primary navigation" className="flex flex-1 flex-col items-center gap-1">

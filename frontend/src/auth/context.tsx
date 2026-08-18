@@ -1,34 +1,17 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { api } from '../api/client'
 import { storeToken, removeToken, getToken, getUserId, getUserEmail } from './storage'
-
-interface User {
-  user_id: string
-  email: string
-}
-
-interface AuthContextType {
-  user: User | null
-  loading: boolean
-  login: (email: string, password: string) => Promise<void>
-  register: (email: string, password: string, region?: string, fieldOfStudy?: string) => Promise<void>
-  logout: () => void
-  isAuthenticated: boolean
-}
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined)
+import { AuthContext } from './AuthContext'
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
+  const [user, setUser] = useState<import('./AuthContext').User | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const token = getToken()
     const userId = getUserId()
     const email = getUserEmail()
-    if (token && userId && email) {
-      setUser({ user_id: userId, email })
-    }
+    if (token && userId && email) setUser({ user_id: userId, email })
     setLoading(false)
   }, [])
 
@@ -56,12 +39,4 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       {children}
     </AuthContext.Provider>
   )
-}
-
-export function useAuth(): AuthContextType {
-  const context = useContext(AuthContext)
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider')
-  }
-  return context
 }

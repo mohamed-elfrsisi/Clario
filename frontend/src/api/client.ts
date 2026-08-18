@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { removeToken, getToken } from '../auth/storage'
+import type { ExperienceEntry } from './types'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
@@ -70,7 +71,7 @@ export const api = {
 
   // Profile
   getProfile: () => client.get('/profile'),
-  saveProfile: (data: { master_skills: string[]; master_experience: any[] }) =>
+  saveProfile: (data: { master_skills: string[]; master_experience: ExperienceEntry[] }) =>
     client.post('/profile', data),
   tailorProfile: (opportunityId: string) => client.post('/profile/tailor', { opportunity_id: opportunityId }),
 }

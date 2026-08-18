@@ -1,9 +1,10 @@
 import type { ReactNode } from 'react'
 import { useState } from 'react'
-import { Bell, Info, Shield, User, LogOut } from 'lucide-react'
-import { useAuth } from '../auth/context'
+import { Bell, Info, Monitor, Moon, Shield, Sun, User, LogOut } from 'lucide-react'
+import { useAuth } from '../auth/useAuth'
 import { pageDescriptions } from '../config/navigation'
 import { Badge, Button, Card } from '../components/ui/ui'
+import { useTheme, type ThemeMode } from '../hooks/useTheme'
 
 type SettingsSection = 'account' | 'preferences' | 'notifications' | 'security'
 
@@ -17,6 +18,7 @@ const sections: Array<{ id: SettingsSection; label: string; icon: typeof User }>
 export function SettingsPage() {
   const { user, logout } = useAuth()
   const [active, setActive] = useState<SettingsSection>('account')
+  const { mode, setMode } = useTheme()
 
   return (
     <div className="space-y-7">
@@ -68,11 +70,23 @@ export function SettingsPage() {
           )}
 
           {active === 'preferences' && (
-            <SettingPlaceholder
-              icon={Info}
-              title="Preferences"
-              description="Workspace preferences will be available in a future update."
-            />
+            <div>
+              <div className="border-b border-[var(--color-border)] px-5 py-5 sm:px-6">
+                <h2 className="text-base font-semibold text-[var(--color-text)]">Preferences</h2>
+                <p className="mt-1 text-sm text-[var(--color-text-secondary)]">Choose how Clario should look on your device.</p>
+              </div>
+              <div className="px-5 py-5 sm:px-6">
+                <div>
+                  <p className="text-sm font-medium text-[var(--color-text)]">Appearance</p>
+                  <p className="mt-1 text-xs text-[var(--color-text-muted)]">Your choice is saved and follows you across sessions.</p>
+                </div>
+                <div className="mt-4 grid gap-3 sm:grid-cols-3" role="radiogroup" aria-label="Appearance mode">
+                  <ThemeOption mode="light" current={mode} onSelect={setMode} icon={Sun} title="Light" description="Cream and white" />
+                  <ThemeOption mode="dark" current={mode} onSelect={setMode} icon={Moon} title="Dark" description="Low-light workspace" />
+                  <ThemeOption mode="system" current={mode} onSelect={setMode} icon={Monitor} title="System" description="Follow device" />
+                </div>
+              </div>
+            </div>
           )}
 
           {active === 'notifications' && (
@@ -106,6 +120,42 @@ export function SettingsPage() {
         </Card>
       </div>
     </div>
+  )
+}
+
+function ThemeOption({
+  mode,
+  current,
+  onSelect,
+  icon: Icon,
+  title,
+  description,
+}: {
+  mode: ThemeMode
+  current: ThemeMode
+  onSelect: (mode: ThemeMode) => void
+  icon: typeof Sun
+  title: string
+  description: string
+}) {
+  const selected = current === mode
+
+  return (
+    <button
+      type="button"
+      role="radio"
+      aria-checked={selected}
+      onClick={() => onSelect(mode)}
+      className={`flex min-h-24 flex-col items-start rounded-[var(--radius-lg)] border p-4 text-left transition-colors ${
+        selected
+          ? 'border-[var(--color-accent-border)] bg-[var(--color-accent-soft)] text-[var(--color-accent-text)] shadow-[var(--shadow-xs)]'
+          : 'border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:border-[var(--color-border-strong)] hover:bg-[var(--color-surface-hover)]'
+      }`}
+    >
+      <Icon className="h-5 w-5" aria-hidden="true" />
+      <span className="mt-3 text-sm font-semibold">{title}</span>
+      <span className="mt-1 text-xs text-[var(--color-text-muted)]">{description}</span>
+    </button>
   )
 }
 

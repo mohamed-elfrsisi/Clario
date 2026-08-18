@@ -7,9 +7,10 @@ export interface MetricCardProps {
   trend?: 'up' | 'down' | 'neutral'
   icon?: ReactNode
   description?: string
+  accent?: 'blue' | 'green' | 'yellow' | 'red'
 }
 
-export function MetricCard({ label, value, change, trend = 'neutral', icon, description }: MetricCardProps) {
+export function MetricCard({ label, value, change, trend = 'neutral', icon, description, accent = 'blue' }: MetricCardProps) {
   const trendClass =
     trend === 'up'
       ? 'text-[var(--color-success-text)]'
@@ -17,8 +18,16 @@ export function MetricCard({ label, value, change, trend = 'neutral', icon, desc
         ? 'text-[var(--color-error-text)]'
         : 'text-[var(--color-text-muted)]'
 
+  const accentClass = {
+    blue: 'bg-[var(--color-blue)]',
+    green: 'bg-[var(--color-green)]',
+    yellow: 'bg-[var(--color-yellow)]',
+    red: 'bg-[var(--color-red)]',
+  }[accent]
+
   return (
-    <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-[var(--shadow-xs)]">
+    <div className="relative overflow-hidden rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-[var(--shadow-xs)]">
+      <div className={`absolute inset-x-0 top-0 h-1 ${accentClass}`} aria-hidden="true" />
       <div className="flex items-start justify-between gap-4">
         <p className="text-sm font-medium text-[var(--color-text-secondary)]">{label}</p>
         {icon && <div className="text-[var(--color-accent-text)]">{icon}</div>}

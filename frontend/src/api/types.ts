@@ -23,15 +23,21 @@ export interface Analysis {
   report_text: string | null
 }
 
+export interface ExperienceEntry {
+  title: string
+  description: string
+  confirmed_metrics: string[]
+}
+
 export interface Profile {
   profile_id: string
   master_skills: string[]
-  master_experience: any[]
+  master_experience: ExperienceEntry[]
 }
 
 export interface TailorResult {
   tailored_skills: string[]
-  tailored_experience: any[]
+  tailored_experience: ExperienceEntry[]
 }
 
 export interface BulletRewriteResult {
@@ -42,7 +48,7 @@ export interface BulletRewriteResult {
 }
 
 export interface DraftResult {
-  sections: Record<string, any[]>
+  sections: Record<string, Record<string, unknown>[]>
   all_skills_detected: string[]
   is_thin: boolean
   note: string | null

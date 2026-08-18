@@ -19,8 +19,8 @@ export function NavItem({ item, compact = false, badge, onNavigate }: NavItemPro
         compact
           ? `group relative flex h-10 w-10 items-center justify-center rounded-lg transition ${
               isActive
-                ? 'bg-[var(--color-accent)] text-[var(--color-accent-contrast)]'
-                : 'text-white/60 hover:bg-white/10 hover:text-white'
+                ? 'bg-[var(--color-accent-soft)] text-[var(--color-accent-text)]'
+                : 'text-[var(--color-text-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-text)]'
             }`
           : `flex min-h-9 items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium transition ${
               isActive

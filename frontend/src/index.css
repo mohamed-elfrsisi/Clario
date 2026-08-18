@@ -8,61 +8,87 @@
    CLARIO DESIGN SYSTEM
    ========================================================= */
 
-:root {
-  --color-bg: #f7f4ec;
-  --color-surface: #ffffff;
-  --color-surface-secondary: #fbfaf7;
-  --color-surface-tertiary: #f1eee5;
-  --color-surface-hover: #f8f6f0;
+ :root {
+  /* Clario brand foundation — derived from the supplied Clario logo */
+  --color-bg: #FBF8F2;
+  --color-auth-panel: #FFFDF9;
+  --color-surface: #FFFDFC;
+  --color-surface-secondary: #F7F4EE;
+  --color-surface-tertiary: #F0ECE4;
+  --color-surface-hover: #F5F1EA;
 
-  --color-text: #252421;
-  --color-text-secondary: #625f57;
-  --color-text-muted: #8b877e;
-  --color-text-placeholder: #aaa59b;
+  --color-text: #202124;
+  --color-text-secondary: #5F6368;
+  --color-text-muted: #80858C;
+  --color-text-placeholder: #9AA0A6;
 
-  --color-accent: #d6a400;
-  --color-accent-hover: #bd9000;
-  --color-accent-active: #a77d00;
-  --color-accent-contrast: #211a00;
-  --color-accent-soft: #fff4c9;
-  --color-accent-text: #806000;
-  --color-accent-border: #ead58b;
+  /* Brand blue — matched to the uploaded Clario logo */
+  --color-blue: #4D62F5;
+  --color-blue-hover: #4358E6;
+  --color-blue-active: #3C50D2;
+  --color-blue-soft: #EEF0FF;
+  --color-blue-text: #3F53D8;
+  --color-blue-border: #C8CEFF;
 
-  --color-border: #e7e2d8;
-  --color-border-strong: #d4cec1;
+  /* Supporting colors — used semantically, not as competing brand colors */
+  --color-green: #35A36B;
+  --color-green-soft: #EAF7F0;
+  --color-green-text: #227A4C;
+  --color-green-border: #B8E2CB;
 
-  --color-input-bg: #ffffff;
-  --color-input-border: #d8d2c7;
-  --color-focus: #b98b00;
-  --color-focus-ring: rgb(214 164 0 / 0.18);
+  --color-yellow: #D9A82E;
+  --color-yellow-soft: #FFF6DC;
+  --color-yellow-text: #8A6814;
+  --color-yellow-border: #EED68F;
 
-  --color-success: #2f7d52;
-  --color-success-bg: #edf7f0;
-  --color-success-border: #b9dec6;
-  --color-success-text: #276a45;
+  --color-red: #D95C5C;
+  --color-red-soft: #FDECEC;
+  --color-red-text: #A83E3E;
+  --color-red-border: #F2BABA;
 
-  --color-warning: #9a6b00;
-  --color-warning-bg: #fff7df;
-  --color-warning-border: #ecd99b;
-  --color-warning-text: #805800;
+  --color-accent: var(--color-blue);
+  --color-accent-hover: var(--color-blue-hover);
+  --color-accent-active: var(--color-blue-active);
+  --color-accent-contrast: #FFFFFF;
+  --color-accent-soft: var(--color-blue-soft);
+  --color-accent-text: var(--color-blue-text);
+  --color-accent-border: var(--color-blue-border);
 
-  --color-error: #b53a34;
-  --color-error-bg: #fff0ef;
-  --color-error-border: #efc0bc;
-  --color-error-text: #9b302b;
+  --color-border: #E8E2D8;
+  --color-border-strong: #D6CFC3;
 
-  --color-info: #3f638a;
-  --color-info-bg: #eef4fa;
-  --color-info-border: #c3d5e7;
-  --color-info-text: #355676;
+  --color-input-bg: #FFFFFF;
+  --color-input-border: #D8D1C6;
+  --color-focus: var(--color-blue);
+  --color-focus-ring: rgb(77 98 245 / 0.16);
 
-  --color-neutral-bg: #f1eee8;
+  --color-success: var(--color-green);
+  --color-success-bg: var(--color-green-soft);
+  --color-success-border: var(--color-green-border);
+  --color-success-text: var(--color-green-text);
 
-  --shadow-xs: 0 1px 2px rgb(45 41 33 / 0.04);
-  --shadow-sm: 0 2px 8px rgb(45 41 33 / 0.06);
-  --shadow-md: 0 8px 24px rgb(45 41 33 / 0.08);
-  --shadow-lg: 0 16px 40px rgb(45 41 33 / 0.10);
-  --shadow-xl: 0 24px 60px rgb(45 41 33 / 0.16);
+  --color-warning: var(--color-yellow);
+  --color-warning-bg: var(--color-yellow-soft);
+  --color-warning-border: var(--color-yellow-border);
+  --color-warning-text: var(--color-yellow-text);
+
+  --color-error: var(--color-red);
+  --color-error-bg: var(--color-red-soft);
+  --color-error-border: var(--color-red-border);
+  --color-error-text: var(--color-red-text);
+
+  --color-info: var(--color-blue);
+  --color-info-bg: var(--color-blue-soft);
+  --color-info-border: var(--color-blue-border);
+  --color-info-text: var(--color-blue-text);
+
+  --color-neutral-bg: #F0ECE4;
+
+  --shadow-xs: 0 1px 2px rgb(32 33 36 / 0.05);
+  --shadow-sm: 0 1px 3px rgb(32 33 36 / 0.07);
+  --shadow-md: 0 5px 16px rgb(32 33 36 / 0.08);
+  --shadow-lg: 0 10px 28px rgb(32 33 36 / 0.10);
+  --shadow-xl: 0 18px 44px rgb(32 33 36 / 0.13);
 
   --radius-sm: 0.375rem;
   --radius-md: 0.625rem;
@@ -88,52 +114,80 @@
   color-scheme: light;
 }
 
+/* Low-glare night palette: softened blacks, warm-neutral surfaces, and the same Clario brand blue. */
 html.dark {
-  --color-bg: #1c1b18;
-  --color-surface: #25231f;
-  --color-surface-secondary: #211f1b;
-  --color-surface-tertiary: #302d27;
-  --color-surface-hover: #302d27;
+  --color-bg: #17191F;
+  --color-auth-panel: #1C1F26;
+  --color-surface: #20232A;
+  --color-surface-secondary: #1B1E24;
+  --color-surface-tertiary: #292D35;
+  --color-surface-hover: #2B3038;
 
-  --color-text: #f5f1e8;
-  --color-text-secondary: #c7c0b3;
-  --color-text-muted: #999286;
-  --color-text-placeholder: #777064;
+  --color-text: #ECEEF2;
+  --color-text-secondary: #B9BEC8;
+  --color-text-muted: #9299A6;
+  --color-text-placeholder: #747B87;
 
-  --color-accent: #e3b42b;
-  --color-accent-hover: #edc14a;
-  --color-accent-active: #c79a18;
-  --color-accent-contrast: #211a00;
-  --color-accent-soft: #3b3218;
-  --color-accent-text: #f0c94e;
-  --color-accent-border: #6f5b25;
+  --color-blue: #8190FF;
+  --color-blue-hover: #91A0FF;
+  --color-blue-active: #7080F2;
+  --color-blue-soft: #252B4A;
+  --color-blue-text: #AEB8FF;
+  --color-blue-border: #4B568F;
 
-  --color-border: #3b3831;
-  --color-border-strong: #514c42;
-  --color-input-bg: #25231f;
-  --color-input-border: #4b463d;
-  --color-focus: #e3b42b;
-  --color-focus-ring: rgb(227 180 43 / 0.22);
+  --color-green: #69C294;
+  --color-green-soft: #1D3026;
+  --color-green-text: #8BD5AA;
+  --color-green-border: #365B47;
 
-  --color-success-bg: #1e3025;
-  --color-success-border: #315b40;
-  --color-success-text: #8dd0a3;
-  --color-warning-bg: #352c18;
-  --color-warning-border: #665323;
-  --color-warning-text: #e8c46a;
-  --color-error-bg: #3a2422;
-  --color-error-border: #70403c;
-  --color-error-text: #ee9993;
-  --color-info-bg: #202d3a;
-  --color-info-border: #3c566f;
-  --color-info-text: #9dbbd7;
-  --color-neutral-bg: #302d27;
+  --color-yellow: #E4BF58;
+  --color-yellow-soft: #352F1D;
+  --color-yellow-text: #F0D27B;
+  --color-yellow-border: #62562E;
+
+  --color-red: #E47A7A;
+  --color-red-soft: #352123;
+  --color-red-text: #F09A9A;
+  --color-red-border: #694044;
+
+  --color-accent: var(--color-blue);
+  --color-accent-hover: var(--color-blue-hover);
+  --color-accent-active: var(--color-blue-active);
+  --color-accent-contrast: #17191F;
+  --color-accent-soft: var(--color-blue-soft);
+  --color-accent-text: var(--color-blue-text);
+  --color-accent-border: var(--color-blue-border);
+
+  --color-border: #343943;
+  --color-border-strong: #4A505B;
+  --color-input-bg: #20232A;
+  --color-input-border: #4A505B;
+  --color-focus: var(--color-blue);
+  --color-focus-ring: rgb(129 144 255 / 0.24);
+
+  --color-success: var(--color-green);
+  --color-success-bg: var(--color-green-soft);
+  --color-success-border: var(--color-green-border);
+  --color-success-text: var(--color-green-text);
+  --color-warning: var(--color-yellow);
+  --color-warning-bg: var(--color-yellow-soft);
+  --color-warning-border: var(--color-yellow-border);
+  --color-warning-text: var(--color-yellow-text);
+  --color-error: var(--color-red);
+  --color-error-bg: var(--color-red-soft);
+  --color-error-border: var(--color-red-border);
+  --color-error-text: var(--color-red-text);
+  --color-info: var(--color-blue);
+  --color-info-bg: var(--color-blue-soft);
+  --color-info-border: var(--color-blue-border);
+  --color-info-text: var(--color-blue-text);
+  --color-neutral-bg: #292D35;
 
   --shadow-xs: 0 1px 2px rgb(0 0 0 / 0.16);
-  --shadow-sm: 0 2px 8px rgb(0 0 0 / 0.20);
-  --shadow-md: 0 8px 24px rgb(0 0 0 / 0.24);
-  --shadow-lg: 0 16px 40px rgb(0 0 0 / 0.28);
-  --shadow-xl: 0 24px 60px rgb(0 0 0 / 0.36);
+  --shadow-sm: 0 1px 3px rgb(0 0 0 / 0.20);
+  --shadow-md: 0 5px 16px rgb(0 0 0 / 0.24);
+  --shadow-lg: 0 10px 28px rgb(0 0 0 / 0.28);
+  --shadow-xl: 0 18px 44px rgb(0 0 0 / 0.34);
 
   color-scheme: dark;
 }
@@ -159,6 +213,11 @@ body {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* The supplied logo remains crisp in both themes; photography is gently dimmed at night to reduce glare. */
+html.dark .auth-photo {
+  filter: brightness(0.76) saturate(0.92);
 }
 
 button, input, textarea, select {
@@ -215,5 +274,94 @@ button:disabled {
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+}
+
+@layer utilities {
+  .brand-blue { color: var(--color-blue); }
+  .brand-green { color: var(--color-green); }
+  .brand-yellow { color: var(--color-yellow); }
+  .brand-red { color: var(--color-red); }
+  .brand-bg-blue { background: var(--color-blue-soft); }
+  .brand-bg-green { background: var(--color-green-soft); }
+  .brand-bg-yellow { background: var(--color-yellow-soft); }
+  .brand-bg-red { background: var(--color-red-soft); }
+}
+
+@layer components {
+  .label {
+    @apply mb-1.5 block text-sm font-medium;
+    color: var(--color-text);
+  }
+
+  .input {
+    @apply min-h-11 w-full rounded-[var(--radius-md)] border px-3 text-sm outline-none transition-colors;
+    background: var(--color-input-bg);
+    border-color: var(--color-input-border);
+    color: var(--color-text);
+  }
+
+  .input::placeholder {
+    color: var(--color-text-placeholder);
+  }
+
+  .input:focus {
+    border-color: var(--color-focus);
+    box-shadow: 0 0 0 3px var(--color-focus-ring);
+  }
+
+  .btn {
+    @apply inline-flex min-h-9 items-center justify-center gap-2 rounded-[var(--radius-md)] border px-3 font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus)] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
+    font-size: 0.75rem;
+  }
+
+  .btn-primary {
+    border-color: transparent;
+    background: var(--color-accent);
+    color: var(--color-accent-contrast);
+    box-shadow: var(--shadow-xs);
+  }
+
+  .btn-primary:hover {
+    background: var(--color-accent-hover);
+  }
+
+  .btn-secondary {
+    background: var(--color-surface);
+    border-color: var(--color-border);
+    color: var(--color-text);
+  }
+
+  .btn-secondary:hover {
+    background: var(--color-surface-hover);
+  }
+
+  .btn-ghost {
+    border-color: transparent;
+    background: transparent;
+    color: var(--color-text-secondary);
+  }
+
+  .btn-ghost:hover {
+    background: var(--color-surface-hover);
+    color: var(--color-text);
+  }
+
+  .card {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-sm);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

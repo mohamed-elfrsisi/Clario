@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { FileText, Upload, Trash2, X, CheckCircle2 } from 'lucide-react'
 import { api } from '../api/client'
 import type { Document } from '../api/types'
@@ -18,7 +18,7 @@ export function DocumentsPage() {
   const [uploadedDoc, setUploadedDoc] = useState<Document | null>(null)
   const [showUploaded, setShowUploaded] = useState(false)
 
-  const loadDocuments = async () => {
+  const loadDocuments = useCallback(async () => {
     setLoading(true)
     try {
       const res = await api.listDocuments(0, 50)
@@ -28,9 +28,9 @@ export function DocumentsPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [add])
 
-  useEffect(() => { loadDocuments() }, [])
+  useEffect(() => { loadDocuments() }, [loadDocuments])
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -69,9 +69,9 @@ export function DocumentsPage() {
     <div className="space-y-5">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-xs font-medium uppercase tracking-wider text-slate-400">Workspace</p>
-          <h2 className="mt-1 text-lg font-semibold text-slate-900">Documents</h2>
-          <p className="mt-0.5 text-sm text-slate-500">{pageDescriptions['/documents']}</p>
+          <p className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-placeholder)]">Workspace</p>
+          <h2 className="mt-1 text-lg font-semibold text-[var(--color-text)]">Documents</h2>
+          <p className="mt-0.5 text-sm text-[var(--color-text-muted)]">{pageDescriptions['/documents']}</p>
         </div>
         <button
           onClick={() => fileInputRef.current?.click()}
@@ -91,13 +91,13 @@ export function DocumentsPage() {
       </div>
 
       {showUploaded && uploadedDoc && (
-        <div className="border border-emerald-200 bg-emerald-50/50 px-4 py-3">
+        <div className="border border-[var(--color-success-border)] bg-[var(--color-success-bg)] px-4 py-3">
           <div className="flex items-start gap-3">
-            <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-600" />
+            <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-[var(--color-success-text)]" />
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-slate-900">{uploadedDoc.filename || 'Uploaded document'}</p>
+              <p className="text-sm font-medium text-[var(--color-text)]">{uploadedDoc.filename || 'Uploaded document'}</p>
               {uploadedDoc.parse_ability_score != null && (
-                <p className="mt-0.5 text-xs text-slate-500">
+                <p className="mt-0.5 text-xs text-[var(--color-text-muted)]">
                   Parse score: {(uploadedDoc.parse_ability_score * 100).toFixed(0)}%
                 </p>
               )}
@@ -109,7 +109,7 @@ export function DocumentsPage() {
                 </div>
               )}
             </div>
-            <button onClick={() => setShowUploaded(false)} className="text-slate-400 hover:text-slate-600">
+            <button onClick={() => setShowUploaded(false)} className="text-[var(--color-text-placeholder)] hover:text-[var(--color-text)]">
               <X className="h-4 w-4" />
             </button>
           </div>
@@ -117,11 +117,11 @@ export function DocumentsPage() {
       )}
 
       {loading ? (
-        <div className="flex items-center justify-center border border-slate-200 bg-white py-16">
-          <span className="h-5 w-5 animate-spin rounded-full border-2 border-slate-300 border-t-indigo-600" />
+        <div className="flex items-center justify-center border border-[var(--color-border)] bg-[var(--color-surface)] py-16">
+          <span className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--color-border-strong)] border-t-[var(--color-accent)]" />
         </div>
       ) : documents.length === 0 ? (
-        <div className="border border-slate-200 bg-white">
+        <div className="border border-[var(--color-border)] bg-[var(--color-surface)]">
           <EmptyState
             icon={FileText}
             title="No documents yet"
@@ -147,11 +147,11 @@ export function DocumentsPage() {
               <TableRow key={doc.document_id}>
                 <TableCell>
                   <div className="flex items-center gap-2">
-                    <FileText className="h-4 w-4 flex-shrink-0 text-slate-400" />
-                    <span className="font-medium text-slate-900">{doc.filename || 'Untitled'}</span>
+                    <FileText className="h-4 w-4 flex-shrink-0 text-[var(--color-text-placeholder)]" />
+                    <span className="font-medium text-[var(--color-text)]">{doc.filename || 'Untitled'}</span>
                   </div>
                 </TableCell>
-                <TableCell className="text-slate-500">{doc.doc_type || '—'}</TableCell>
+                <TableCell className="text-[var(--color-text-muted)]">{doc.doc_type || '—'}</TableCell>
                 <TableCell className="tabular-nums">
                   {doc.parse_ability_score != null
                     ? `${(doc.parse_ability_score * 100).toFixed(0)}%`
@@ -166,7 +166,7 @@ export function DocumentsPage() {
                   <button
                     onClick={() => handleDelete(doc.document_id)}
                     disabled={deletingId === doc.document_id}
-                    className="inline-flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-red-600 disabled:opacity-50"
+                    className="inline-flex items-center gap-1 text-xs font-medium text-[var(--color-text-muted)] hover:text-[var(--color-error-text)] disabled:opacity-50"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                     Delete

@@ -10,7 +10,7 @@ interface NavSectionProps {
 export function NavSection({ group, counts, onNavigate }: NavSectionProps) {
   return (
     <div className="mb-4">
-      <p className="mb-1 px-2.5 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+      <p className="mb-1 px-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
         {group.title}
       </p>
       <nav className="flex flex-col gap-0.5">

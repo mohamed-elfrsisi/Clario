@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Search, X, CheckCircle, XCircle } from 'lucide-react'
 import { api } from '../api/client'
 import type { Document, Opportunity, Analysis } from '../api/types'
@@ -15,7 +15,7 @@ export function AnalysisPage() {
   const [documents, setDocuments] = useState<Document[]>([])
   const [opportunities, setOpportunities] = useState<Opportunity[]>([])
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       const [dRes, oRes] = await Promise.all([
         api.listDocuments(0, 50),
@@ -26,11 +26,11 @@ export function AnalysisPage() {
     } catch {
       add('error', 'Failed to load data')
     }
-  }
+  }, [add])
 
   useEffect(() => {
     loadData()
-  }, [])
+  }, [loadData])
 
   const handleAnalyze = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -57,12 +57,12 @@ export function AnalysisPage() {
   return (
     <div className="space-y-5">
       <div>
-        <p className="text-xs font-medium uppercase tracking-wider text-slate-400">Career Intelligence</p>
-        <h2 className="mt-1 text-lg font-semibold text-slate-900">Resume Analysis</h2>
-        <p className="mt-0.5 text-sm text-slate-500">{pageDescriptions['/analysis']}</p>
+        <p className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-placeholder)]">Career Intelligence</p>
+        <h2 className="mt-1 text-lg font-semibold text-[var(--color-text)]">Resume Analysis</h2>
+        <p className="mt-0.5 text-sm text-[var(--color-text-muted)]">{pageDescriptions['/analysis']}</p>
       </div>
 
-      <form onSubmit={handleAnalyze} className="border border-slate-200 bg-white p-4">
+      <form onSubmit={handleAnalyze} className="border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
         <div className="grid gap-4 md:grid-cols-2">
           <div>
             <label className="label">Resume / Document</label>
@@ -80,7 +80,7 @@ export function AnalysisPage() {
               ))}
             </select>
             {documents.length === 0 && (
-              <p className="mt-1 text-xs text-slate-400">No documents available. Upload one first.</p>
+              <p className="mt-1 text-xs text-[var(--color-text-placeholder)]">No documents available. Upload one first.</p>
             )}
           </div>
           <div>
@@ -99,12 +99,12 @@ export function AnalysisPage() {
               ))}
             </select>
             {opportunities.length === 0 && (
-              <p className="mt-1 text-xs text-slate-400">No opportunities available. Add one first.</p>
+              <p className="mt-1 text-xs text-[var(--color-text-placeholder)]">No opportunities available. Add one first.</p>
             )}
           </div>
         </div>
 
-        <div className="mt-4 border-t border-slate-100 pt-4">
+        <div className="mt-4 border-t border-[var(--color-border)] pt-4">
           <button
             type="submit"
             disabled={loading || !documentId || !opportunityId}
@@ -128,11 +128,11 @@ export function AnalysisPage() {
       {result && (
         <div className="space-y-4">
           {/* Match score bar */}
-          <div className="border border-slate-200 bg-white p-4">
+          <div className="border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-medium uppercase tracking-wider text-slate-400">Match Score</p>
-                <p className="mt-1 text-2xl font-semibold tabular-nums text-slate-900">{matchPct}%</p>
+                <p className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-placeholder)]">Match Score</p>
+                <p className="mt-1 text-2xl font-semibold tabular-nums text-[var(--color-text)]">{matchPct}%</p>
               </div>
               <Badge variant={matchPct >= 60 ? 'success' : matchPct >= 40 ? 'warning' : 'error'}>
                 {matchPct >= 80 ? 'Strong Match' :
@@ -140,10 +140,10 @@ export function AnalysisPage() {
                  matchPct >= 40 ? 'Partial Match' : 'Needs Work'}
               </Badge>
             </div>
-            <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-100">
+            <div className="mt-3 h-2 overflow-hidden rounded-full bg-[var(--color-surface-tertiary)]">
               <div
                 className={`h-full rounded-full transition-all ${
-                  matchPct >= 60 ? 'bg-emerald-500' : matchPct >= 40 ? 'bg-amber-500' : 'bg-red-500'
+                  matchPct >= 60 ? 'bg-[var(--color-success)]' : matchPct >= 40 ? 'bg-[var(--color-warning)]' : 'bg-[var(--color-error)]'
                 }`}
                 style={{ width: `${matchPct}%` }}
               />
@@ -151,9 +151,9 @@ export function AnalysisPage() {
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
-            <div className="border border-slate-200 bg-white p-4">
-              <h3 className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-slate-900">
-                <CheckCircle className="h-4 w-4 text-emerald-500" />
+            <div className="border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
+              <h3 className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-[var(--color-text)]">
+                <CheckCircle className="h-4 w-4 text-[var(--color-success)]" />
                 Matched Skills
               </h3>
               {result.matched.length > 0 ? (
@@ -163,12 +163,12 @@ export function AnalysisPage() {
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-slate-400">No matched skills</p>
+                <p className="text-sm text-[var(--color-text-placeholder)]">No matched skills</p>
               )}
             </div>
-            <div className="border border-slate-200 bg-white p-4">
-              <h3 className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-slate-900">
-                <XCircle className="h-4 w-4 text-red-500" />
+            <div className="border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
+              <h3 className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-[var(--color-text)]">
+                <XCircle className="h-4 w-4 text-[var(--color-error)]" />
                 Missing Skills
               </h3>
               {result.missing.length > 0 ? (
@@ -178,27 +178,27 @@ export function AnalysisPage() {
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-slate-400">No missing skills</p>
+                <p className="text-sm text-[var(--color-text-placeholder)]">No missing skills</p>
               )}
             </div>
           </div>
 
           {result.parse_ability_score != null && (
-            <div className="flex items-center justify-between border border-slate-200 bg-white px-4 py-3">
+            <div className="flex items-center justify-between border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3">
               <div>
-                <p className="text-sm font-medium text-slate-900">ATS / Parseability</p>
-                <p className="text-xs text-slate-400">How readable your document is for automated systems</p>
+                <p className="text-sm font-medium text-[var(--color-text)]">ATS / Parseability</p>
+                <p className="text-xs text-[var(--color-text-placeholder)]">How readable your document is for automated systems</p>
               </div>
-              <span className="text-lg font-semibold tabular-nums text-slate-900">
+              <span className="text-lg font-semibold tabular-nums text-[var(--color-text)]">
                 {(result.parse_ability_score * 100).toFixed(0)}%
               </span>
             </div>
           )}
 
           {result.report_text && (
-            <div className="border border-slate-200 bg-white p-4">
-              <h3 className="mb-2 text-sm font-semibold text-slate-900">Recommendations</h3>
-              <pre className="whitespace-pre-wrap text-sm leading-relaxed text-slate-600">
+            <div className="border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
+              <h3 className="mb-2 text-sm font-semibold text-[var(--color-text)]">Recommendations</h3>
+              <pre className="whitespace-pre-wrap text-sm leading-relaxed text-[var(--color-text-secondary)]">
                 {result.report_text}
               </pre>
             </div>
@@ -212,10 +212,10 @@ export function AnalysisPage() {
       )}
 
       {!result && (
-        <div className="border border-dashed border-slate-200 bg-white px-4 py-12 text-center">
-          <Search className="mx-auto h-8 w-8 text-slate-300" />
-          <p className="mt-2 text-sm font-medium text-slate-700">Ready to analyze</p>
-          <p className="mt-0.5 text-xs text-slate-400">
+        <div className="border border-dashed border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-12 text-center">
+          <Search className="mx-auto h-8 w-8 text-[var(--color-border-strong)]" />
+          <p className="mt-2 text-sm font-medium text-[var(--color-text-secondary)]">Ready to analyze</p>
+          <p className="mt-0.5 text-xs text-[var(--color-text-placeholder)]">
             Select a document and opportunity above, then click Analyze Resume.
           </p>
         </div>

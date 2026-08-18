@@ -46,21 +46,21 @@ export function BulletsPage() {
   return (
     <div className="space-y-5">
       <div>
-        <p className="text-xs font-medium uppercase tracking-wider text-slate-400">Career Intelligence</p>
-        <h2 className="mt-1 text-lg font-semibold text-slate-900">Bullet Writer</h2>
-        <p className="mt-0.5 text-sm text-slate-500">{pageDescriptions['/bullets']}</p>
+        <p className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-placeholder)]">Career Intelligence</p>
+        <h2 className="mt-1 text-lg font-semibold text-[var(--color-text)]">Bullet Writer</h2>
+        <p className="mt-0.5 text-sm text-[var(--color-text-muted)]">{pageDescriptions['/bullets']}</p>
       </div>
 
       <form onSubmit={handleRewrite}>
         <div className="grid gap-4 lg:grid-cols-2">
           {/* Original input */}
-          <div className="border border-slate-200 bg-white">
-            <div className="flex items-center justify-between border-b border-slate-100 px-3 py-2">
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Original</span>
-              <span className="text-[11px] text-slate-400">{bullets.length} bullets · {wordCount} words</span>
+          <div className="border border-[var(--color-border)] bg-[var(--color-surface)]">
+            <div className="flex items-center justify-between border-b border-[var(--color-border)] px-3 py-2">
+              <span className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">Original</span>
+              <span className="text-[11px] text-[var(--color-text-placeholder)]">{bullets.length} bullets · {wordCount} words</span>
             </div>
             <textarea
-              className="w-full resize-y border-0 px-3 py-3 font-mono text-sm text-slate-700 focus:outline-none focus:ring-0 min-h-[220px]"
+              className="w-full resize-y border-0 px-3 py-3 font-mono text-sm text-[var(--color-text-secondary)] focus:outline-none focus:ring-0 min-h-[220px]"
               placeholder={"Worked on a website using Django\nHelped with testing\nLed a team of 4 students"}
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -68,14 +68,14 @@ export function BulletsPage() {
           </div>
 
           {/* Result */}
-          <div className="border border-slate-200 bg-white">
-            <div className="flex items-center justify-between border-b border-slate-100 px-3 py-2">
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Clario</span>
+          <div className="border border-[var(--color-border)] bg-[var(--color-surface)]">
+            <div className="flex items-center justify-between border-b border-[var(--color-border)] px-3 py-2">
+              <span className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">Clario</span>
               {selected && (
                 <button
                   type="button"
                   onClick={() => copyToClipboard(selected.rewritten)}
-                  className="inline-flex items-center gap-1 text-[11px] font-medium text-indigo-600 hover:text-indigo-700"
+                  className="inline-flex items-center gap-1 text-[11px] font-medium text-[var(--color-accent-text)] hover:text-[var(--color-accent-text)]"
                 >
                   <Copy className="h-3 w-3" />
                   Copy
@@ -85,13 +85,13 @@ export function BulletsPage() {
             <div className="min-h-[220px] px-3 py-3">
               {loading ? (
                 <div className="flex h-full items-center justify-center py-16">
-                  <span className="h-5 w-5 animate-spin rounded-full border-2 border-slate-300 border-t-indigo-600" />
+                  <span className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--color-border-strong)] border-t-[var(--color-accent)]" />
                 </div>
               ) : selected ? (
                 <div>
-                  <p className="font-mono text-sm leading-relaxed text-slate-900">{selected.rewritten}</p>
+                  <p className="font-mono text-sm leading-relaxed text-[var(--color-text)]">{selected.rewritten}</p>
                   {selected.needs_review && (
-                    <div className="mt-3 flex items-start gap-2 rounded border border-amber-200 bg-amber-50 px-2.5 py-2 text-xs text-amber-800">
+                    <div className="mt-3 flex items-start gap-2 rounded border border-[var(--color-warning-border)] bg-[var(--color-warning-bg)] px-2.5 py-2 text-xs text-[var(--color-warning-text)]">
                       <AlertCircle className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" />
                       {selected.placeholders_added > 0
                         ? `Fill in ${selected.placeholders_added} placeholder${selected.placeholders_added > 1 ? 's' : ''} with your actual metrics`
@@ -101,8 +101,8 @@ export function BulletsPage() {
                 </div>
               ) : (
                 <div className="flex h-full flex-col items-center justify-center py-16 text-center">
-                  <ArrowDown className="h-5 w-5 text-slate-300" />
-                  <p className="mt-2 text-xs text-slate-400">Rewritten bullets will appear here</p>
+                  <ArrowDown className="h-5 w-5 text-[var(--color-border-strong)]" />
+                  <p className="mt-2 text-xs text-[var(--color-text-placeholder)]">Rewritten bullets will appear here</p>
                 </div>
               )}
             </div>
@@ -122,28 +122,28 @@ export function BulletsPage() {
 
       {/* All results list */}
       {results.length > 1 && (
-        <div className="border border-slate-200 bg-white">
-          <div className="border-b border-slate-100 px-3 py-2">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+        <div className="border border-[var(--color-border)] bg-[var(--color-surface)]">
+          <div className="border-b border-[var(--color-border)] px-3 py-2">
+            <span className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
               All results ({results.length})
             </span>
           </div>
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-[var(--color-border)]">
             {results.map((r, idx) => (
               <button
                 key={idx}
                 type="button"
                 onClick={() => setSelectedIdx(idx)}
-                className={`flex w-full items-start gap-3 px-3 py-2.5 text-left transition hover:bg-slate-50 ${
-                  idx === selectedIdx ? 'bg-indigo-50/50' : ''
+                className={`flex w-full items-start gap-3 px-3 py-2.5 text-left transition hover:bg-[var(--color-surface-secondary)] ${
+                  idx === selectedIdx ? 'bg-[var(--color-accent-soft)]' : ''
                 }`}
               >
-                <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded bg-slate-100 text-[10px] font-semibold text-slate-500">
+                <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded bg-[var(--color-surface-tertiary)] text-[10px] font-semibold text-[var(--color-text-muted)]">
                   {idx + 1}
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-xs text-slate-400">{r.original}</p>
-                  <p className="mt-0.5 truncate text-sm text-slate-900">{r.rewritten}</p>
+                  <p className="truncate text-xs text-[var(--color-text-placeholder)]">{r.original}</p>
+                  <p className="mt-0.5 truncate text-sm text-[var(--color-text)]">{r.rewritten}</p>
                 </div>
               </button>
             ))}

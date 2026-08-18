@@ -5,7 +5,7 @@ import { Card } from '../components/ui/Card'
 import { MetricCard } from '../components/ui/MetricCard'
 import type { DashboardOverview } from '../api/types'
 import { dashboardService } from '../services/dashboardService'
-import { useAuth } from '../auth/context'
+import { useAuth } from '../auth/useAuth'
 
 function displayName(email?: string | null) {
   const localPart = email?.split('@')[0]?.trim()
@@ -82,6 +82,15 @@ export function DashboardPage() {
               <MetricCard
                 key={metric.label}
                 label={metric.label}
+                accent={
+                  metric.label === 'Career Score'
+                    ? 'blue'
+                    : metric.label === 'Resume Score'
+                      ? 'green'
+                      : metric.label === 'Average Opportunity Fit'
+                        ? 'yellow'
+                        : 'red'
+                }
                 value={
                   <span>
                     {metric.value}
