@@ -1,33 +1,19 @@
 // src/app.js
 //
-// This file configures the Express application: middleware, routes,
-// 404 handling, and error handling.
-//
-// It does NOT start the server (listen on a port). That happens in
-// server.js. Keeping "app configuration" separate from "server startup"
-// means we can later test app.js (e.g. with supertest) without actually
-// opening a network port, and it makes it obvious where each concern lives.
+// Configures the Express application. Server startup lives in server.js.
 
 const express = require("express");
 const { testConnection } = require("./config/database");
 const userRoutes = require("./routes/user.routes");
+const AppError = require("./errors/app-error");
+const errorHandler = require("./middleware/error.middleware");
 
 const app = express();
 
-// ------------------------------------------------------------------
-// Middleware
-// ------------------------------------------------------------------
-
-// Parses incoming requests with a JSON body (e.g. POST /api/test)
-// and makes the result available as req.body.
+// Parse JSON request bodies.
 app.use(express.json());
 
-// ------------------------------------------------------------------
-// Routes
-// ------------------------------------------------------------------
-
-// Health check: confirms the HTTP server is alive.
-// Intentionally does NOT touch a database - Phase 1 has no database.
+// Basic health check: verifies the HTTP application is alive.
 app.get("/api/health", (req, res) => {
   res.status(200).json({
     status: "ok",
@@ -35,99 +21,55 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-// TEMPORARY / LEARNING ENDPOINT ONLY.
-// Demonstrates express.json() parsing a request body.
-// This is not a real Clario feature and will be removed once we no
-// longer need it for learning/testing.
+// Temporary learning endpoint from Phase 1.
 app.post("/api/test", (req, res) => {
   const message = req.body.message;
+
   res.status(200).json({
     received: message,
   });
 });
 
-// TEMPORARY / LEARNING ENDPOINT ONLY.
-// Deliberately throws an error so we can see the error-handling
-// middleware below in action. Not a real Clario feature.
-app.get("/api/test-error", (req, res, next) => {
-  try {
-    throw new Error("This is a deliberate test error");
-  } catch (err) {
-    next(err); // hand the error off to Express's error-handling middleware
-  }
+// Temporary learning endpoint used to demonstrate centralized error handling.
+app.get("/api/test-error", (req, res) => {
+  throw new Error("This is a deliberate test error");
 });
 
-// ------------------------------------------------------------------
-// PHASE 3 - Layered user routes
-// ------------------------------------------------------------------
-// GET /api/db/users/count and GET /api/db/users/by-email used to be
-// defined inline right here, calling `pool.query()` directly (Phase 2).
-// They've been refactored into:
-//   src/routes/user.routes.js       (routing)
-//   src/controllers/user.controller.js (HTTP layer)
-//   src/services/user.service.js       (application logic)
-//   src/repositories/user.repository.js (SQL / pg pool)
-// app.js no longer knows these endpoints run any SQL at all - it just
-// mounts the router under a path prefix.
+// User routes.
 app.use("/api/db/users", userRoutes);
 
-// /api/health/db stays here: it's a system-level check (is PostgreSQL
-// reachable at all?), not a "users" concern, so it doesn't belong in
-// the user layers above. It still only uses the safe testConnection()
-// helper from config/database.js, never the pool directly.
+// Database health check. It deliberately converts the low-level
+// connectivity failure into an AppError so the central error handler
+// controls the public response shape.
 app.get("/api/health/db", async (req, res) => {
   const result = await testConnection();
 
-  if (result.connected) {
-    return res.status(200).json({
-      status: "ok",
-      database: "connected",
-    });
+  if (!result.connected) {
+    console.error(
+      "Database connectivity check failed:",
+      result.error?.message
+    );
+
+    throw new AppError(
+      500,
+      "DATABASE_ERROR",
+      "Database operation failed"
+    );
   }
 
-  // Log the real error on the server only - never send connection
-  // details, hostnames, or credentials back to the client.
-  console.error("Database connectivity check failed:", result.error.message);
-
-  return res.status(500).json({
-    error: {
-      code: "DATABASE_ERROR",
-      message: "Database operation failed",
-    },
+  res.status(200).json({
+    status: "ok",
+    database: "connected",
   });
 });
 
-// ------------------------------------------------------------------
-// 404 handler
-// ------------------------------------------------------------------
-// This runs if a request doesn't match any route defined above.
-// It must be registered AFTER all real routes.
-app.use((req, res) => {
-  res.status(404).json({
-    error: {
-      code: "NOT_FOUND",
-      message: "Route not found",
-    },
-  });
+// Route-level 404: this runs only after every real route above has had
+// a chance to match the request.
+app.use((req, res, next) => {
+  next(new AppError(404, "NOT_FOUND", "Route not found"));
 });
 
-// ------------------------------------------------------------------
-// Centralized error handler
-// ------------------------------------------------------------------
-// Express recognizes this as an error handler because it takes 4
-// arguments (err, req, res, next). It must be registered LAST.
-// Any call to next(err) anywhere in the app ends up here.
-app.use((err, req, res, next) => {
-  // Log the real error on the server for debugging.
-  console.error(err);
-
-  // Never leak stack traces or internal details to the client.
-  res.status(500).json({
-    error: {
-      code: "INTERNAL_SERVER_ERROR",
-      message: "Internal server error",
-    },
-  });
-});
+// Centralized error handler MUST be last.
+app.use(errorHandler);
 
 module.exports = app;
