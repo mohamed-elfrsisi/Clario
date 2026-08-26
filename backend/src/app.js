@@ -5,6 +5,7 @@
 const express = require("express");
 const { testConnection } = require("./config/database");
 const userRoutes = require("./routes/user.routes");
+const authRoutes = require("./routes/auth.routes");
 const AppError = require("./errors/app-error");
 const errorHandler = require("./middleware/error.middleware");
 
@@ -34,6 +35,9 @@ app.post("/api/test", (req, res) => {
 app.get("/api/test-error", (req, res) => {
   throw new Error("This is a deliberate test error");
 });
+
+// Authentication routes.
+app.use("/api/auth", authRoutes);
 
 // User routes.
 app.use("/api/db/users", userRoutes);
