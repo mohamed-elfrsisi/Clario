@@ -53,7 +53,7 @@ export function TopBar({ onMenuClick }: TopBarProps) {
         </div>
       </div>
 
-      <div className="ml-auto flex items-center gap-1.5">
+      <div className="ms-auto flex items-center gap-1.5">
         <button
           type="button"
           onClick={toggleTheme}
@@ -70,7 +70,7 @@ export function TopBar({ onMenuClick }: TopBarProps) {
           aria-label={t('topbar.notifications')}
         >
           <Bell className="h-4 w-4" />
-          <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-[var(--color-accent)]" />
+          <span className="absolute end-2 top-2 h-1.5 w-1.5 rounded-full bg-[var(--color-accent)]" />
         </button>
         <UserMenu />
       </div>

@@ -19,7 +19,7 @@ export function InterviewSessionPage() {
 
   useEffect(() => {
     interviewService.getQuestion(interviewId).then(setQuestion).catch(() => setError(t('This interview session is no longer available.'))).finally(() => setLoading(false))
-  }, [interviewId])
+  }, [interviewId, t])
 
   const submit = async () => {
     setError('')

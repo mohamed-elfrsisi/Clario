@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Tajawal:wght@400;500;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -373,7 +373,10 @@ html.dark .auth-career-image {
 }
 
 /* Phase 11: direction-safe layout helpers */
-html[dir="rtl"] body { font-family: Inter, "Segoe UI", Tahoma, Arial, sans-serif; }
+/* Arabic text needs an Arabic-native typeface — Inter has no Arabic glyphs, so without this
+   every Arabic string silently falls back to the OS default font, breaking the branded look. */
+html[dir="rtl"] body { font-family: Tajawal, "Segoe UI", Tahoma, Arial, sans-serif; }
+html[dir="rtl"] h1, html[dir="rtl"] h2, html[dir="rtl"] h3, html[dir="rtl"] h4 { letter-spacing: 0; }
 html[dir="rtl"] .auth-career-image { transform: none; }
 html[dir="rtl"] input[type="email"],
 html[dir="rtl"] input[type="url"],

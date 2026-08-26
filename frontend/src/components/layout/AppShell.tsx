@@ -2,6 +2,7 @@ import { useState, type ReactNode } from 'react'
 import { PrimarySidebar } from './PrimarySidebar'
 import { SecondarySidebar } from './SecondarySidebar'
 import { TopBar } from './TopBar'
+import { useI18n } from '../../i18n/hooks'
 
 interface AppShellProps {
   children: ReactNode
@@ -10,6 +11,7 @@ interface AppShellProps {
 export function AppShell({ children }: AppShellProps) {
   const [secondaryCollapsed, setSecondaryCollapsed] = useState(false)
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
+  const { t } = useI18n()
 
   return (
     <div className="flex min-h-screen bg-[var(--color-bg)]">
@@ -24,11 +26,11 @@ export function AppShell({ children }: AppShellProps) {
         <div className="fixed inset-0 z-50 lg:hidden">
           <button
             type="button"
-            aria-label="Close navigation"
+            aria-label={t('nav.closeNav')}
             className="absolute inset-0 bg-black/30 backdrop-blur-[1px]"
             onClick={() => setMobileNavOpen(false)}
           />
-          <div className="absolute left-0 top-0 h-full w-[280px] shadow-[var(--shadow-xl)]">
+          <div className="absolute start-0 top-0 h-full w-[280px] shadow-[var(--shadow-xl)]">
             <SecondarySidebar
               collapsed={false}
               onToggle={() => {}}

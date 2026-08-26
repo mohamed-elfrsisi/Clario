@@ -67,7 +67,7 @@ export function CareerProfilePage() {
           <div className="flex items-center gap-2"><BriefcaseBusiness className="h-4 w-4 text-[var(--color-accent-text)]" /><h2 className="font-semibold">{t("Experience")}</h2></div>
           <div className="mt-4 space-y-5">
             {profile.experience.map((item) => (
-              <div key={item.id} className="border-l-2 border-[var(--color-accent-border)] pl-4">
+              <div key={item.id} className="border-s-2 border-[var(--color-accent-border)] ps-4">
                 <div className="flex flex-wrap justify-between gap-2">
                   <h3 className="font-medium text-[var(--color-text)]">{item.role} · {item.company}</h3>
                   <span className="text-xs text-[var(--color-text-muted)]">{item.period}</span>

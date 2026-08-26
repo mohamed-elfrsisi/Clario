@@ -18,6 +18,8 @@ function PasswordField({
   visible,
   onToggle,
   onChange,
+  showLabel,
+  hideLabel,
 }: {
   id: string
   label: string
@@ -28,12 +30,14 @@ function PasswordField({
   visible: boolean
   onToggle: () => void
   onChange: (event: ChangeEvent<HTMLInputElement>) => void
+  showLabel: string
+  hideLabel: string
 }) {
   return (
     <div>
       <label htmlFor={id} className="mb-1.5 block text-sm font-medium text-[var(--color-text)]">{label}</label>
       <div className="relative">
-        <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-text-muted)]" aria-hidden="true" />
+        <Lock className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-text-muted)]" aria-hidden="true" />
         <input
           id={id}
           type={visible ? 'text' : 'password'}
@@ -41,13 +45,13 @@ function PasswordField({
           placeholder={placeholder}
           autoComplete={autoComplete}
           onChange={onChange}
-          className={`min-h-11 w-full rounded-[var(--radius-md)] border bg-[var(--color-input-bg)] py-2.5 pl-9 pr-11 text-sm text-[var(--color-text)] outline-none transition focus:border-[var(--color-focus)] focus:ring-2 focus:ring-[var(--color-focus-ring)] ${error ? 'border-[var(--color-error)]' : 'border-[var(--color-input-border)]'}`}
+          className={`min-h-11 w-full rounded-[var(--radius-md)] border bg-[var(--color-input-bg)] py-2.5 ps-9 pe-11 text-sm text-[var(--color-text)] outline-none transition focus:border-[var(--color-focus)] focus:ring-2 focus:ring-[var(--color-focus-ring)] ${error ? 'border-[var(--color-error)]' : 'border-[var(--color-input-border)]'}`}
         />
         <button
           type="button"
-          aria-label={visible ? `Hide ${label.toLowerCase()}` : `Show ${label.toLowerCase()}`}
+          aria-label={visible ? hideLabel : showLabel}
           onClick={onToggle}
-          className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-[var(--color-text-muted)] hover:bg-[var(--color-surface-hover)]"
+          className="absolute end-2.5 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-[var(--color-text-muted)] hover:bg-[var(--color-surface-hover)]"
         >
           {visible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
         </button>
@@ -78,11 +82,11 @@ export function RegisterPage() {
 
   const validate = () => {
     const next: Record<string, string> = {}
-    if (!form.email.trim()) next.email = 'Email is required'
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) next.email = 'Enter a valid email address'
-    if (!form.password) next.password = 'Password is required'
-    else if (form.password.length < 8) next.password = 'Password must be at least 8 characters'
-    if (form.password && form.password !== form.confirmPassword) next.confirmPassword = 'Passwords do not match'
+    if (!form.email.trim()) next.email = t('auth.emailRequired')
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) next.email = t('auth.emailInvalid')
+    if (!form.password) next.password = t('auth.passwordRequired')
+    else if (form.password.length < 8) next.password = t('auth.passwordMinLength')
+    if (form.password && form.password !== form.confirmPassword) next.confirmPassword = t('auth.passwordMismatch')
     setErrors(next)
     return Object.keys(next).length === 0
   }
@@ -94,12 +98,12 @@ export function RegisterPage() {
     setGeneralError('')
     try {
       await register(form.email.trim().toLowerCase(), form.password, form.region.trim() || undefined, form.fieldOfStudy.trim() || undefined)
-      add('success', 'Account created successfully!')
+      add('success', t('auth.accountCreated'))
       navigate('/dashboard', { replace: true })
     } catch (err: unknown) {
-      const detail = (err as { response?: { data?: { detail?: string } } }).response?.data?.detail || 'Registration failed.'
+      const detail = (err as { response?: { data?: { detail?: string } } }).response?.data?.detail || t('auth.registrationFailed')
       setGeneralError(typeof detail === 'string' ? detail : String(detail))
-      add('error', 'Registration failed. Please try again.')
+      add('error', t('auth.registrationFailedRetry'))
     } finally {
       setLoading(false)
     }
@@ -107,12 +111,12 @@ export function RegisterPage() {
 
   return (
     <AuthLayout
-      eyebrow="Start your career workspace"
+      eyebrow={t('auth.startWorkspace')}
       title={t('auth.registerTitle')}
-      description="Build your profile once, define your target, and use Clario to understand which opportunities move you forward."
+      description={t('auth.registerDesc')}
       topAction={
         <button type="button" onClick={() => navigate('/login')} className="font-semibold text-[var(--color-blue-text)] hover:underline">
-          Sign in
+          {t('auth.signin')}
         </button>
       }
     >
@@ -132,40 +136,44 @@ export function RegisterPage() {
               id="register-password"
               label={t('auth.password')}
               value={form.password}
-              placeholder="At least 8 characters"
+              placeholder={t('auth.passwordPlaceholder')}
               autoComplete="new-password"
               error={errors.password}
               visible={showPassword}
               onToggle={() => setShowPassword((current) => !current)}
               onChange={(event) => update('password', event.target.value)}
+              showLabel={t('auth.showPassword')}
+              hideLabel={t('auth.hidePassword')}
             />
             <PasswordField
               id="register-confirm-password"
               label={t('auth.password')}
               value={form.confirmPassword}
-              placeholder="Repeat password"
+              placeholder={t('auth.confirmPasswordPlaceholder')}
               autoComplete="new-password"
               error={errors.confirmPassword}
               visible={showConfirmPassword}
               onToggle={() => setShowConfirmPassword((current) => !current)}
               onChange={(event) => update('confirmPassword', event.target.value)}
+              showLabel={t('auth.showPassword')}
+              hideLabel={t('auth.hidePassword')}
             />
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <Input id="register-region" label="Region" hint="Optional" value={form.region} placeholder="e.g. Egypt" leading={<MapPin className="h-4 w-4" />} onChange={(event) => update('region', event.target.value)} />
-            <Input id="register-field" label="Field of study" hint="Optional" value={form.fieldOfStudy} placeholder="e.g. Computer Science" leading={<User className="h-4 w-4" />} onChange={(event) => update('fieldOfStudy', event.target.value)} />
+            <Input id="register-region" label={t('auth.region')} hint={t('auth.optional')} value={form.region} placeholder={t('auth.regionPlaceholder')} leading={<MapPin className="h-4 w-4" />} onChange={(event) => update('region', event.target.value)} />
+            <Input id="register-field" label={t('auth.fieldOfStudy')} hint={t('auth.optional')} value={form.fieldOfStudy} placeholder={t('auth.fieldOfStudyPlaceholder')} leading={<User className="h-4 w-4" />} onChange={(event) => update('fieldOfStudy', event.target.value)} />
           </div>
 
           <Button type="submit" size="lg" loading={loading} className="mt-2 w-full">
-            Create account
-            {!loading && <ArrowRight className="h-4 w-4" />}
+            {t('auth.createAccount')}
+            {!loading && <ArrowRight className="h-4 w-4 rtl:rotate-180" />}
           </Button>
         </form>
 
         <div className="mt-6 border-t border-[var(--color-border)] pt-5 text-center text-sm text-[var(--color-text-secondary)]">
-          Already have an account?{' '}
-          <button type="button" onClick={() => navigate('/login')} className="font-semibold text-[var(--color-blue-text)] hover:underline">Sign in</button>
+          {t('auth.alreadyHaveAccount')}{' '}
+          <button type="button" onClick={() => navigate('/login')} className="font-semibold text-[var(--color-blue-text)] hover:underline">{t('auth.signin')}</button>
         </div>
       </div>
     </AuthLayout>

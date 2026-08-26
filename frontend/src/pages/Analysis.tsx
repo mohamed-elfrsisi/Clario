@@ -28,7 +28,7 @@ export function AnalysisPage() {
     } catch {
       add('error', t('Failed to load data'))
     }
-  }, [add])
+  }, [add, t])
 
   useEffect(() => {
     loadData()

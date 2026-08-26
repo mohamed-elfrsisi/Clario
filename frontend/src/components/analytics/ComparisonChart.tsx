@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n/hooks'
 import type { OpportunityComparisonPoint } from '../../api/analyticsTypes'
 
 interface ComparisonChartProps {
@@ -6,6 +7,7 @@ interface ComparisonChartProps {
 }
 
 export function ComparisonChart({ points, ariaLabel }: ComparisonChartProps) {
+  const { t } = useI18n()
   const width = 760
   const height = 270
   const left = 40
@@ -40,8 +42,8 @@ export function ComparisonChart({ points, ariaLabel }: ComparisonChartProps) {
         })}
       </svg>
       <div className="mt-2 flex flex-wrap gap-4 text-xs text-[var(--color-text-secondary)]">
-        <span className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-sm bg-[var(--color-accent)]" />Opportunity Fit</span>
-        <span className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-sm bg-[var(--color-text)] opacity-80" />Career Alignment</span>
+        <span className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-sm bg-[var(--color-accent)]" />{t('Opportunity Fit')}</span>
+        <span className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-sm bg-[var(--color-text)] opacity-80" />{t('Career Alignment')}</span>
       </div>
     </div>
   )

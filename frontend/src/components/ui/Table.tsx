@@ -8,7 +8,7 @@ interface TableProps {
 export function Table({ children, className = '' }: TableProps) {
   return (
     <div className={`overflow-x-auto border border-[var(--color-border)] bg-[var(--color-surface)] ${className}`}>
-      <table className="w-full min-w-[640px] border-collapse text-left text-sm">
+      <table className="w-full min-w-[640px] border-collapse text-start text-sm">
         {children}
       </table>
     </div>

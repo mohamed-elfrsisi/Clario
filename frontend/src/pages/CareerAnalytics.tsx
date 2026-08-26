@@ -26,7 +26,7 @@ export function CareerAnalyticsPage() {
       .catch(() => { if (active) setError(t('We could not load your career analytics right now.')) })
       .finally(() => { if (active) setLoading(false) })
     return () => { active = false }
-  }, [])
+  }, [t])
 
   if (loading) return <LoadingState label={t("Loading career analytics...")} />
   if (error) return <ErrorState title={t("Analytics unavailable")} description={error} />

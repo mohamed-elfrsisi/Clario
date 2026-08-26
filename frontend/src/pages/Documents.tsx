@@ -30,7 +30,7 @@ export function DocumentsPage() {
     } finally {
       setLoading(false)
     }
-  }, [add])
+  }, [add, t])
 
   useEffect(() => { loadDocuments() }, [loadDocuments])
 

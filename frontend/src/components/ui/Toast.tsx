@@ -49,7 +49,7 @@ export function Toast({ type, message, onRemove }: ToastProps) {
 export function ToastContainer({ toasts, onRemove }: { toasts: { id: number; type: string; message: string }[]; onRemove: (id: number) => void }) {
   if (toasts.length === 0) return null
   return (
-    <div className="fixed bottom-4 right-4 z-50 flex max-h-64 flex-col gap-2 w-80">
+    <div className="fixed bottom-4 end-4 z-50 flex max-h-64 w-80 flex-col gap-2">
       {toasts.map((toast) => (
         <Toast key={toast.id} type={toast.type} message={toast.message} onRemove={() => onRemove(toast.id)} />
       ))}

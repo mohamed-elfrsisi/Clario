@@ -32,7 +32,7 @@ export function ProfilePage() {
     } finally {
       setLoading(false)
     }
-  }, [add])
+  }, [add, t])
 
   useEffect(() => {
     loadProfile()

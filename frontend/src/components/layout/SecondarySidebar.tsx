@@ -3,6 +3,7 @@ import { secondaryNavGroups } from '../../config/navigation'
 import { NavSection } from '../navigation/NavSection'
 import { useAuth } from '../../auth/useAuth'
 import { BrandLogo } from '../brand/BrandLogo'
+import { useI18n } from '../../i18n/hooks'
 
 interface SecondarySidebarProps {
   collapsed: boolean
@@ -13,6 +14,12 @@ interface SecondarySidebarProps {
 
 export function SecondarySidebar({ collapsed, onToggle, onNavigate, mobile = false }: SecondarySidebarProps) {
   const { user } = useAuth()
+  const { t, dir } = useI18n()
+  const isRtl = dir === 'rtl'
+  // In RTL the sidebar sits on the visual right, so the icon that means "expand
+  // toward the content" and "collapse away from it" is mirrored from the LTR case.
+  const ExpandIcon = isRtl ? ChevronLeft : ChevronRight
+  const CollapseIcon = isRtl ? ChevronRight : ChevronLeft
 
   if (collapsed && !mobile) {
     return (
@@ -21,10 +28,10 @@ export function SecondarySidebar({ collapsed, onToggle, onNavigate, mobile = fal
           type="button"
           onClick={onToggle}
           className="flex h-8 w-8 items-center justify-center rounded-lg text-[var(--color-text-muted)] hover:bg-[var(--color-surface-hover)]"
-          title="Expand sidebar"
-          aria-label="Expand sidebar"
+          title={t('nav.expandSidebar')}
+          aria-label={t('nav.expandSidebar')}
         >
-          <ChevronRight className="h-4 w-4" />
+          <ExpandIcon className="h-4 w-4" />
         </button>
       </aside>
     )
@@ -49,10 +56,10 @@ export function SecondarySidebar({ collapsed, onToggle, onNavigate, mobile = fal
             type="button"
             onClick={onToggle}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-[var(--color-text-muted)] hover:bg-[var(--color-surface-hover)]"
-            title="Collapse sidebar"
-            aria-label="Collapse sidebar"
+            title={t('nav.collapseSidebar')}
+            aria-label={t('nav.collapseSidebar')}
           >
-            <ChevronLeft className="h-4 w-4" />
+            <CollapseIcon className="h-4 w-4" />
           </button>
         )}
       </div>

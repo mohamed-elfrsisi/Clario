@@ -24,9 +24,9 @@ export function LoginPage() {
 
   const validate = () => {
     const next: typeof errors = {}
-    if (!email.trim()) next.email = 'Email is required'
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) next.email = 'Enter a valid email address'
-    if (!password) next.password = 'Password is required'
+    if (!email.trim()) next.email = t('auth.emailRequired')
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) next.email = t('auth.emailInvalid')
+    if (!password) next.password = t('auth.passwordRequired')
     setErrors(next)
     return Object.keys(next).length === 0
   }
@@ -38,10 +38,10 @@ export function LoginPage() {
     setErrors({})
     try {
       await login(email.trim().toLowerCase(), password)
-      add('success', 'Welcome back!')
+      add('success', t('auth.welcomeToast'))
       navigate(from, { replace: true })
     } catch (err: unknown) {
-      const detail = (err as { response?: { data?: { detail?: string } } }).response?.data?.detail || 'Login failed. Please check your credentials.'
+      const detail = (err as { response?: { data?: { detail?: string } } }).response?.data?.detail || t('auth.loginFailed')
       setErrors({ general: detail })
       add('error', detail)
     } finally {
@@ -56,7 +56,7 @@ export function LoginPage() {
       description={t('auth.loginDesc')}
       topAction={
         <button type="button" onClick={() => navigate('/register')} className="font-semibold text-[var(--color-blue-text)] hover:underline">
-          Create account
+          {t('auth.createAccount')}
         </button>
       }
     >
@@ -69,7 +69,7 @@ export function LoginPage() {
 
         <div className="mb-5 flex items-center gap-2 rounded-xl bg-[var(--color-blue-soft)] px-3 py-2.5 text-xs font-medium text-[var(--color-blue-text)]">
           <ShieldCheck className="h-4 w-4 shrink-0" aria-hidden="true" />
-          Your career workspace stays focused and secure.
+          {t('auth.secureWorkspace')}
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -94,7 +94,7 @@ export function LoginPage() {
               <label htmlFor="password" className="text-sm font-medium text-[var(--color-text)]">{t('auth.password')}</label>
             </div>
             <div className="relative">
-              <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-text-muted)]" />
+              <Lock className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-text-muted)]" />
               <input
                 id="password"
                 type={showPassword ? 'text' : 'password'}
@@ -106,9 +106,9 @@ export function LoginPage() {
                   setPassword(event.target.value)
                   setErrors((current) => ({ ...current, password: undefined, general: undefined }))
                 }}
-                className={`min-h-11 w-full rounded-[var(--radius-md)] border bg-[var(--color-input-bg)] py-2.5 pl-9 pr-11 text-sm text-[var(--color-text)] outline-none transition focus:border-[var(--color-focus)] focus:ring-2 focus:ring-[var(--color-focus-ring)] ${errors.password ? 'border-[var(--color-error)]' : 'border-[var(--color-input-border)]'}`}
+                className={`min-h-11 w-full rounded-[var(--radius-md)] border bg-[var(--color-input-bg)] py-2.5 ps-9 pe-11 text-sm text-[var(--color-text)] outline-none transition focus:border-[var(--color-focus)] focus:ring-2 focus:ring-[var(--color-focus-ring)] ${errors.password ? 'border-[var(--color-error)]' : 'border-[var(--color-input-border)]'}`}
               />
-              <button type="button" aria-label={showPassword ? 'Hide password' : 'Show password'} onClick={() => setShowPassword((value) => !value)} className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-[var(--color-text-muted)] hover:bg-[var(--color-surface-hover)]">
+              <button type="button" aria-label={showPassword ? t('auth.hidePassword') : t('auth.showPassword')} onClick={() => setShowPassword((value) => !value)} className="absolute end-2.5 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-[var(--color-text-muted)] hover:bg-[var(--color-surface-hover)]">
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
@@ -116,8 +116,8 @@ export function LoginPage() {
           </div>
 
           <Button type="submit" size="lg" loading={loading} className="w-full">
-            Sign in
-            {!loading && <ArrowRight className="h-4 w-4" />}
+            {t('auth.signin')}
+            {!loading && <ArrowRight className="h-4 w-4 rtl:rotate-180" />}
           </Button>
         </form>
 

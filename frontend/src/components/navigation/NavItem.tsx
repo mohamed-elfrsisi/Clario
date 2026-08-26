@@ -37,7 +37,7 @@ export function NavItem({ item, compact = false, badge, onNavigate }: NavItemPro
       <item.icon className={compact ? 'h-[18px] w-[18px]' : 'h-[17px] w-[17px] flex-shrink-0'} />
       {!compact && <span className="min-w-0 flex-1 truncate">{label}</span>}
       {!compact && badge != null && badge > 0 && (
-        <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--color-surface-tertiary)] px-1.5 text-[10px] font-semibold text-[var(--color-text-secondary)]">
+        <span className="ms-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--color-surface-tertiary)] px-1.5 text-[10px] font-semibold text-[var(--color-text-secondary)]">
           {badge}
         </span>
       )}

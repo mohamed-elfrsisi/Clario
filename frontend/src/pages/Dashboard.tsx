@@ -127,7 +127,7 @@ export function DashboardPage() {
                 value={
                   <span>
                     {metric.value}
-                    <span className="ml-0.5 text-base font-medium text-[var(--color-text-muted)]">
+                    <span className="ms-0.5 text-base font-medium text-[var(--color-text-muted)]">
                       {metric.suffix}
                     </span>
                   </span>

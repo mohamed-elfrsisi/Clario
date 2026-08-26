@@ -56,7 +56,7 @@ export function OpportunitiesPage() {
     } finally {
       setLoading(false)
     }
-  }, [add])
+  }, [add, t])
 
   useEffect(() => {
     void loadOpportunities()

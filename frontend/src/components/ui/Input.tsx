@@ -19,7 +19,7 @@ export function Input({ label, hint, error, leading, id, className = '', ...prop
       )}
       <div className="relative">
         {leading && (
-          <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-[var(--color-text-muted)]">
+          <span className="pointer-events-none absolute inset-y-0 start-3 flex items-center text-[var(--color-text-muted)]">
             {leading}
           </span>
         )}
@@ -27,7 +27,7 @@ export function Input({ label, hint, error, leading, id, className = '', ...prop
           id={inputId}
           aria-invalid={Boolean(error)}
           aria-describedby={hint || error ? `${inputId}-hint` : undefined}
-          className={`min-h-11 w-full rounded-[var(--radius-md)] border bg-[var(--color-input-bg)] px-3 text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-placeholder)] transition-colors focus:border-[var(--color-focus)] focus:outline-none focus:ring-2 focus:ring-[var(--color-focus-ring)] disabled:cursor-not-allowed disabled:bg-[var(--color-surface-secondary)] ${leading ? 'pl-9' : ''} ${error ? 'border-[var(--color-error)]' : 'border-[var(--color-input-border)]'} ${className}`}
+          className={`min-h-11 w-full rounded-[var(--radius-md)] border bg-[var(--color-input-bg)] px-3 text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-placeholder)] transition-colors focus:border-[var(--color-focus)] focus:outline-none focus:ring-2 focus:ring-[var(--color-focus-ring)] disabled:cursor-not-allowed disabled:bg-[var(--color-surface-secondary)] ${leading ? 'ps-9' : ''} ${error ? 'border-[var(--color-error)]' : 'border-[var(--color-input-border)]'} ${className}`}
           {...props}
         />
       </div>
