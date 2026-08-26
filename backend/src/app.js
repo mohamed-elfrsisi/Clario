@@ -9,7 +9,8 @@
 // opening a network port, and it makes it obvious where each concern lives.
 
 const express = require("express");
-const { pool, testConnection } = require("./config/database");
+const { testConnection } = require("./config/database");
+const userRoutes = require("./routes/user.routes");
 
 const app = express();
 
@@ -57,14 +58,23 @@ app.get("/api/test-error", (req, res, next) => {
 });
 
 // ------------------------------------------------------------------
-// PHASE 2 - Database routes
+// PHASE 3 - Layered user routes
 // ------------------------------------------------------------------
-// These routes talk to PostgreSQL directly through the shared pool.
-// We are NOT introducing controllers/services/repositories yet -
-// that refactor belongs to Phase 3. For now it's fine for a route
-// handler to call pool.query() directly.
+// GET /api/db/users/count and GET /api/db/users/by-email used to be
+// defined inline right here, calling `pool.query()` directly (Phase 2).
+// They've been refactored into:
+//   src/routes/user.routes.js       (routing)
+//   src/controllers/user.controller.js (HTTP layer)
+//   src/services/user.service.js       (application logic)
+//   src/repositories/user.repository.js (SQL / pg pool)
+// app.js no longer knows these endpoints run any SQL at all - it just
+// mounts the router under a path prefix.
+app.use("/api/db/users", userRoutes);
 
-// Confirms PostgreSQL is reachable. Does not expose host/user/password.
+// /api/health/db stays here: it's a system-level check (is PostgreSQL
+// reachable at all?), not a "users" concern, so it doesn't belong in
+// the user layers above. It still only uses the safe testConnection()
+// helper from config/database.js, never the pool directly.
 app.get("/api/health/db", async (req, res) => {
   const result = await testConnection();
 
@@ -85,84 +95,6 @@ app.get("/api/health/db", async (req, res) => {
       message: "Database operation failed",
     },
   });
-});
-
-// LEARNING ENDPOINT: first real query against the existing `users` table.
-// Demonstrates async/await with pool.query().
-app.get("/api/db/users/count", async (req, res) => {
-  try {
-    const result = await pool.query("SELECT COUNT(*) AS count FROM users");
-
-    // pool.query() returns rows as an array. COUNT(*) always returns
-    // exactly one row. PostgreSQL sends COUNT back as a string (it can
-    // exceed JS's safe integer range for very large tables), so we
-    // convert it to a number here.
-    const count = Number(result.rows[0].count);
-
-    res.status(200).json({ count });
-  } catch (err) {
-    console.error("Failed to count users:", err.message);
-    res.status(500).json({
-      error: {
-        code: "DATABASE_ERROR",
-        message: "Database operation failed",
-      },
-    });
-  }
-});
-
-// LEARNING ENDPOINT: parameterized query using a value from the client
-// (req.query.email, i.e. the "?email=..." part of the URL).
-//
-// IMPORTANT: We NEVER build SQL like this:
-//   `SELECT * FROM users WHERE email = '${email}'`
-// That lets an attacker send something like:  ' OR '1'='1
-// which changes the query's logic and could return every row in the
-// table. Instead we use a placeholder ($1) and pass the real value
-// separately - PostgreSQL treats it strictly as data, never as SQL.
-app.get("/api/db/users/by-email", async (req, res) => {
-  const email = req.query.email;
-
-  if (!email) {
-    return res.status(400).json({
-      error: {
-        code: "BAD_REQUEST",
-        message: "Query parameter 'email' is required",
-      },
-    });
-  }
-
-  try {
-    const query = `
-      SELECT user_id, email, role
-      FROM users
-      WHERE email = $1
-    `;
-    const values = [email];
-
-    const result = await pool.query(query, values);
-
-    if (result.rows.length === 0) {
-      return res.status(404).json({
-        error: {
-          code: "USER_NOT_FOUND",
-          message: "User not found",
-        },
-      });
-    }
-
-    // Only ever return safe columns. password_hash is never selected
-    // above, so there is no risk of accidentally leaking it here.
-    res.status(200).json({ user: result.rows[0] });
-  } catch (err) {
-    console.error("Failed to look up user by email:", err.message);
-    res.status(500).json({
-      error: {
-        code: "DATABASE_ERROR",
-        message: "Database operation failed",
-      },
-    });
-  }
 });
 
 // ------------------------------------------------------------------
