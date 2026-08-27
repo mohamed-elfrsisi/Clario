@@ -7,6 +7,15 @@ const AppError = require('../errors/app-error');
 const { hashPassword, verifyPassword } = require('../utils/password');
 const { createAccessToken } = require('../utils/token');
 
+// Fixed, non-secret scrypt hash used ONLY to burn an equivalent amount
+// of CPU time when a login is attempted against an email that doesn't
+// exist (see the timing note in login() below). This is not a real
+// password hash for any real account - it never matches any user's
+// actual password_hash - it exists purely to make the "user not
+// found" and "wrong password" code paths take the same amount of time.
+const DUMMY_PASSWORD_HASH =
+  'scrypt$16384$8$1$805d6d3fdd1b8bf87c5b8e017266d6b3$d48e3ddfb9d3265543b9e2285aa335896a8de8572917d2df91b5fd254e13ff409ea27cbce0ca28acc474472addb3bd3010e164fc6aadcbed89221c058832d653';
+
 async function register({ email, password }) {
   const normalizedEmail = email.trim().toLowerCase();
 
@@ -44,13 +53,20 @@ async function login({ email, password }) {
 
   // Deliberately use the same public error for unknown email and wrong
   // password. This avoids revealing which email addresses are registered.
-  if (!user) {
-    throw new AppError(401, 'INVALID_CREDENTIALS', 'Invalid email or password');
-  }
+  //
+  // SECURITY (Phase 8): the response *body* was already identical for
+  // both cases, but the response *time* was not - when `user` is null
+  // we used to return immediately, skipping the scrypt call entirely,
+  // while a wrong-password attempt always paid the full scrypt cost.
+  // That timing gap is itself an oracle an attacker can use to
+  // enumerate registered emails. We close it by doing an equivalent
+  // amount of hashing work (against a fixed dummy hash) even when the
+  // user doesn't exist, so both paths take comparable time.
+  const passwordValid = user
+    ? await verifyPassword(password, user.password_hash)
+    : await verifyPassword(password, DUMMY_PASSWORD_HASH);
 
-  const passwordValid = await verifyPassword(password, user.password_hash);
-
-  if (!passwordValid) {
+  if (!user || !passwordValid) {
     throw new AppError(401, 'INVALID_CREDENTIALS', 'Invalid email or password');
   }
 

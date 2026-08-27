@@ -24,6 +24,25 @@ function isPostgresError(err) {
   );
 }
 
+// express.json() (via body-parser) throws http-errors instances for
+// things like an oversized body or malformed JSON. Those carry a safe,
+// pre-defined `status`/`statusCode` and an `expose: true` flag meaning
+// the message itself was written to be client-safe - unlike an
+// arbitrary thrown Error, which might contain internal details.
+function isSafeHttpError(err) {
+  return Boolean(
+    err &&
+      err.expose === true &&
+      typeof (err.statusCode || err.status) === "number"
+  );
+}
+
+const HTTP_ERROR_CODES = {
+  400: "BAD_REQUEST",
+  413: "PAYLOAD_TOO_LARGE",
+  415: "UNSUPPORTED_MEDIA_TYPE",
+};
+
 function errorHandler(err, req, res, next) {
   // `next` is part of Express's error-handler signature. It is kept in
   // the signature intentionally, even though this handler normally ends
@@ -34,6 +53,17 @@ function errorHandler(err, req, res, next) {
     return res.status(err.statusCode).json({
       error: {
         code: err.code,
+        message: err.message,
+      },
+    });
+  }
+
+  if (isSafeHttpError(err)) {
+    const statusCode = err.statusCode || err.status;
+
+    return res.status(statusCode).json({
+      error: {
+        code: HTTP_ERROR_CODES[statusCode] || "REQUEST_ERROR",
         message: err.message,
       },
     });

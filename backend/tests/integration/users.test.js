@@ -3,19 +3,45 @@
 // Exercises GET /api/db/users/count and GET /api/db/users/by-email
 // against the real local PostgreSQL database and its existing seed
 // rows (mohamed.test@clario.local, admin@clario.local). Does not
-// create or delete any data, so no cleanup is needed here.
+// create or delete any data (beyond the one QA account this suite
+// registers to authenticate with), so no seed-data cleanup is needed.
+//
+// SECURITY (Phase 8): both endpoints used to be reachable without any
+// authentication, which let anyone enumerate registered emails/roles.
+// They now require a valid session, so every test here logs in first
+// and sends the resulting auth cookie. See also
+// tests/integration/users.security.test.js for the tests that assert
+// the *unauthenticated* paths are correctly rejected.
 
 const request = require("supertest");
 const app = require("../../src/app");
 const { pool } = require("../../src/config/database");
+const { uniqueTestEmail } = require("../helpers/uniqueEmail");
+
+let authCookie;
+
+beforeAll(async () => {
+  const email = uniqueTestEmail();
+  const password = "correct-horse-battery";
+
+  await request(app).post("/api/auth/register").send({ email, password });
+  const loginRes = await request(app)
+    .post("/api/auth/login")
+    .send({ email, password });
+
+  authCookie = loginRes.headers["set-cookie"];
+});
 
 afterAll(async () => {
+  await pool.query("DELETE FROM users WHERE email LIKE 'qa.%@clario.test'");
   await pool.end();
 });
 
 describe("GET /api/db/users/count", () => {
-  test("returns a numeric count backed by the real database", async () => {
-    const res = await request(app).get("/api/db/users/count");
+  test("returns a numeric count backed by the real database when authenticated", async () => {
+    const res = await request(app)
+      .get("/api/db/users/count")
+      .set("Cookie", authCookie);
 
     expect(res.status).toBe(200);
     expect(typeof res.body.count).toBe("number");
@@ -25,9 +51,10 @@ describe("GET /api/db/users/count", () => {
 });
 
 describe("GET /api/db/users/by-email", () => {
-  test("returns only safe fields for a known user", async () => {
+  test("returns only safe fields for a known user when authenticated", async () => {
     const res = await request(app)
       .get("/api/db/users/by-email")
+      .set("Cookie", authCookie)
       .query({ email: "mohamed.test@clario.local" });
 
     expect(res.status).toBe(200);
@@ -41,6 +68,7 @@ describe("GET /api/db/users/by-email", () => {
   test("returns 404 USER_NOT_FOUND for a well-formed but unknown email", async () => {
     const res = await request(app)
       .get("/api/db/users/by-email")
+      .set("Cookie", authCookie)
       .query({ email: "definitely.not.a.real.user@clario.local" });
 
     expect(res.status).toBe(404);
@@ -50,7 +78,9 @@ describe("GET /api/db/users/by-email", () => {
   });
 
   test("returns 400 VALIDATION_ERROR when email is missing", async () => {
-    const res = await request(app).get("/api/db/users/by-email");
+    const res = await request(app)
+      .get("/api/db/users/by-email")
+      .set("Cookie", authCookie);
 
     expect(res.status).toBe(400);
     expect(res.body.error.code).toBe("VALIDATION_ERROR");
@@ -60,6 +90,7 @@ describe("GET /api/db/users/by-email", () => {
   test("returns 400 VALIDATION_ERROR for an obviously malformed email", async () => {
     const res = await request(app)
       .get("/api/db/users/by-email")
+      .set("Cookie", authCookie)
       .query({ email: "hello" });
 
     expect(res.status).toBe(400);
@@ -69,6 +100,7 @@ describe("GET /api/db/users/by-email", () => {
   test("a classic injection payload with spaces/quotes fails validation before it ever reaches SQL", async () => {
     const res = await request(app)
       .get("/api/db/users/by-email")
+      .set("Cookie", authCookie)
       .query({ email: "' OR '1'='1" });
 
     // This shape doesn't even look like an email, so it's rejected by
@@ -84,6 +116,7 @@ describe("GET /api/db/users/by-email", () => {
     // instead of a clean 404.
     const res = await request(app)
       .get("/api/db/users/by-email")
+      .set("Cookie", authCookie)
       .query({ email: "a'or'1'='1@example.com" });
 
     expect(res.status).toBe(404);
