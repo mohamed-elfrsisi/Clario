@@ -1,0 +1,92 @@
+// tests/integration/users.test.js
+//
+// Exercises GET /api/db/users/count and GET /api/db/users/by-email
+// against the real local PostgreSQL database and its existing seed
+// rows (mohamed.test@clario.local, admin@clario.local). Does not
+// create or delete any data, so no cleanup is needed here.
+
+const request = require("supertest");
+const app = require("../../src/app");
+const { pool } = require("../../src/config/database");
+
+afterAll(async () => {
+  await pool.end();
+});
+
+describe("GET /api/db/users/count", () => {
+  test("returns a numeric count backed by the real database", async () => {
+    const res = await request(app).get("/api/db/users/count");
+
+    expect(res.status).toBe(200);
+    expect(typeof res.body.count).toBe("number");
+    // At minimum the two seed users created for earlier phases.
+    expect(res.body.count).toBeGreaterThanOrEqual(2);
+  });
+});
+
+describe("GET /api/db/users/by-email", () => {
+  test("returns only safe fields for a known user", async () => {
+    const res = await request(app)
+      .get("/api/db/users/by-email")
+      .query({ email: "mohamed.test@clario.local" });
+
+    expect(res.status).toBe(200);
+    expect(res.body.user).toMatchObject({
+      email: "mohamed.test@clario.local",
+      role: "student",
+    });
+    expect(res.body.user).not.toHaveProperty("password_hash");
+  });
+
+  test("returns 404 USER_NOT_FOUND for a well-formed but unknown email", async () => {
+    const res = await request(app)
+      .get("/api/db/users/by-email")
+      .query({ email: "definitely.not.a.real.user@clario.local" });
+
+    expect(res.status).toBe(404);
+    expect(res.body).toEqual({
+      error: { code: "USER_NOT_FOUND", message: "User not found" },
+    });
+  });
+
+  test("returns 400 VALIDATION_ERROR when email is missing", async () => {
+    const res = await request(app).get("/api/db/users/by-email");
+
+    expect(res.status).toBe(400);
+    expect(res.body.error.code).toBe("VALIDATION_ERROR");
+    expect(res.body.error.message).toBe("Email is required");
+  });
+
+  test("returns 400 VALIDATION_ERROR for an obviously malformed email", async () => {
+    const res = await request(app)
+      .get("/api/db/users/by-email")
+      .query({ email: "hello" });
+
+    expect(res.status).toBe(400);
+    expect(res.body.error.code).toBe("VALIDATION_ERROR");
+  });
+
+  test("a classic injection payload with spaces/quotes fails validation before it ever reaches SQL", async () => {
+    const res = await request(app)
+      .get("/api/db/users/by-email")
+      .query({ email: "' OR '1'='1" });
+
+    // This shape doesn't even look like an email, so it's rejected by
+    // validation before the repository runs any query - defense in depth.
+    expect(res.status).toBe(400);
+    expect(res.body.error.code).toBe("VALIDATION_ERROR");
+  });
+
+  test("an injection-shaped value that DOES pass email format validation is still safely parameterized", async () => {
+    // No whitespace, exactly one @, and a dot in the domain part - this
+    // clears the regex and reaches the repository's pool.query() call.
+    // If parameterization ever broke, this could return every user
+    // instead of a clean 404.
+    const res = await request(app)
+      .get("/api/db/users/by-email")
+      .query({ email: "a'or'1'='1@example.com" });
+
+    expect(res.status).toBe(404);
+    expect(res.body.error.code).toBe("USER_NOT_FOUND");
+  });
+});

@@ -5,7 +5,7 @@ const { pool } = require('../config/database');
 
 async function findUserByEmail(email) {
   const query = `
-    SELECT user_id, email, password_hash
+    SELECT user_id, email, password_hash, role
     FROM users
     WHERE email = $1
   `;
@@ -25,7 +25,19 @@ async function createUser(email, passwordHash) {
   return result.rows[0];
 }
 
+async function findPublicUserById(userId) {
+  const query = `
+    SELECT user_id, email, role, created_at, updated_at
+    FROM users
+    WHERE user_id = $1
+  `;
+
+  const result = await pool.query(query, [userId]);
+  return result.rows[0] || null;
+}
+
 module.exports = {
   findUserByEmail,
+  findPublicUserById,
   createUser,
 };

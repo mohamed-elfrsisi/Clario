@@ -77,7 +77,36 @@ function validateRegistration(req, res, next) {
   next();
 }
 
+function validateLogin(req, res, next) {
+  const { email, password } = req.body || {};
+
+  if (typeof email !== 'string' || email.trim() === '') {
+    return next(new AppError(400, 'VALIDATION_ERROR', 'Email is required'));
+  }
+
+  const normalizedEmail = email.trim();
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if (!emailPattern.test(normalizedEmail)) {
+    return next(new AppError(400, 'VALIDATION_ERROR', 'Invalid email'));
+  }
+
+  if (typeof password !== 'string' || password.length === 0) {
+    return next(new AppError(400, 'VALIDATION_ERROR', 'Password is required'));
+  }
+
+  if (password.length > 128) {
+    return next(
+      new AppError(400, 'VALIDATION_ERROR', 'Password must not exceed 128 characters')
+    );
+  }
+
+  req.body.email = normalizedEmail;
+  next();
+}
+
 module.exports = {
   validateUserEmailQuery,
   validateRegistration,
+  validateLogin,
 };
