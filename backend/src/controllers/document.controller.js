@@ -1,5 +1,3 @@
-// src/controllers/document.controller.js
-
 const documentService = require('../services/document.service');
 
 async function listDocuments(req, res) {
@@ -18,6 +16,14 @@ async function createDocument(req, res) {
   res.status(201).json({ document });
 }
 
+async function uploadDocument(req, res) {
+  const document = await documentService.uploadDocument(req.user.userId, {
+    buffer: req.body,
+    ...req.validatedUpload,
+  });
+  res.status(201).json({ document });
+}
+
 async function updateDocument(req, res) {
   const document = await documentService.updateDocument(req.user.userId, req.params.documentId, req.body);
   res.status(200).json({ document });
@@ -28,10 +34,4 @@ async function deleteDocument(req, res) {
   res.status(204).send();
 }
 
-module.exports = {
-  listDocuments,
-  getDocument,
-  createDocument,
-  updateDocument,
-  deleteDocument,
-};
+module.exports = { listDocuments, getDocument, createDocument, uploadDocument, updateDocument, deleteDocument };

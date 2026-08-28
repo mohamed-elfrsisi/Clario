@@ -636,6 +636,42 @@ function validateAddTargetSkill(req, res, next) {
 const CHECKSUM_SHA256_PATTERN = /^[0-9a-f]{64}$/;
 const MAX_FILE_SIZE_BYTES = 50 * 1024 * 1024; // 50 MB - a sane upper bound for resumes/cover letters
 
+function validateUploadDocument(req, res, next) {
+  const contentType = String(req.headers['content-type'] || '').split(';', 1)[0].trim().toLowerCase();
+  const fileName = req.headers['x-file-name'];
+  const documentType = req.headers['x-document-type'];
+  const parentDocumentId = req.headers['x-parent-document-id'];
+  const checksumSha256 = req.headers['x-checksum-sha256'];
+
+  if (!Buffer.isBuffer(req.body)) {
+    return next(new AppError(400, 'INVALID_UPLOAD', 'Binary file body is required'));
+  }
+  if (typeof fileName !== 'string' || fileName.trim() === '' || fileName.length > 255) {
+    return next(new AppError(400, 'INVALID_FILE_NAME', 'A valid filename is required'));
+  }
+  if (documentType !== undefined && documentType.length > 255) {
+    return next(new AppError(400, 'VALIDATION_ERROR', 'documentType must not exceed 255 characters'));
+  }
+  if (parentDocumentId !== undefined && !UUID_PATTERN.test(parentDocumentId)) {
+    return next(new AppError(400, 'VALIDATION_ERROR', 'Invalid parentDocumentId'));
+  }
+  if (checksumSha256 !== undefined && !CHECKSUM_SHA256_PATTERN.test(checksumSha256)) {
+    return next(new AppError(400, 'VALIDATION_ERROR', 'checksumSha256 must be 64 lowercase hex characters'));
+  }
+  if (!contentType) {
+    return next(new AppError(400, 'VALIDATION_ERROR', 'Content-Type is required'));
+  }
+
+  req.validatedUpload = {
+    fileName: fileName.trim(),
+    mimeType: contentType,
+    documentType: documentType === undefined ? undefined : documentType.trim(),
+    parentDocumentId,
+    checksumSha256,
+  };
+  next();
+}
+
 function validateDocumentIdParam(req, res, next) {
   validateUuidParam('documentId')(req, res, next);
 }
@@ -996,6 +1032,7 @@ module.exports = {
   validateDocumentIdParam,
   validateCreateDocument,
   validateUpdateDocument,
+  validateUploadDocument,
   validateProjectIdParam,
   validateCreateProject,
   validateUpdateProject,

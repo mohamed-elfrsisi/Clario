@@ -1,18 +1,12 @@
-// src/services/document.service.js
-//
-// IMPORTANT SCOPE NOTE: there is no object storage integration in this
-// backend (no S3/GCS/filesystem upload code exists anywhere in the
-// project). This service only ever persists/retrieves document
-// METADATA. It does not upload, download, scan, or extract text from
-// anything - `rawText`, `scanStatus`, and `parseabilityScore` are
-// processing-pipeline outputs that don't exist yet, so they are never
-// settable through this API and always come back null/'pending' until
-// that pipeline is built.
-
 const { withTransaction } = require('../config/database');
 const documentRepository = require('../repositories/document.repository');
 const profileService = require('./profile.service');
+const { storageProvider } = require('../storage');
+const { DefaultDocumentProcessor } = require('../processors/document.processor');
+const { validateUploadedFile } = require('./document-validation.service');
 const AppError = require('../errors/app-error');
+
+const documentProcessor = new DefaultDocumentProcessor();
 
 function toPublicDocument(row) {
   return {
@@ -44,72 +38,112 @@ async function listDocuments(userId, { page, limit }) {
 async function getDocument(userId, documentId) {
   const profileId = await profileService.requireOwnedProfileId(userId);
   const row = await documentRepository.findOwned(documentId, profileId);
-
-  if (!row) {
-    throw new AppError(404, 'DOCUMENT_NOT_FOUND', 'Document not found');
-  }
-
+  if (!row) throw new AppError(404, 'DOCUMENT_NOT_FOUND', 'Document not found');
   return toPublicDocument(row);
 }
 
-// parentDocumentId, when provided, must be a document already owned
-// by this caller - never trusted blindly - and the new row's
-// version_number is computed server-side as parent + 1, never taken
-// from the client. Locking the parent row (FOR UPDATE, inside a
-// transaction) prevents two concurrent "new version" requests from
-// both computing the same next version number.
 async function createDocument(userId, fields) {
   const profileId = await profileService.requireOwnedProfileId(userId);
   const { parentDocumentId } = fields;
 
   return withTransaction(async (client) => {
     let versionNumber = 1;
-
     if (parentDocumentId) {
       const parent = await documentRepository.findOwnedForUpdate(parentDocumentId, profileId, client);
-      if (!parent) {
-        throw new AppError(404, 'PARENT_DOCUMENT_NOT_FOUND', 'Parent document not found');
-      }
+      if (!parent) throw new AppError(404, 'PARENT_DOCUMENT_NOT_FOUND', 'Parent document not found');
       versionNumber = parent.version_number + 1;
     }
-
     const created = await documentRepository.create(profileId, { ...fields, versionNumber }, client);
     return toPublicDocument(created);
   });
 }
 
-async function updateDocument(userId, documentId, fields) {
+async function uploadDocument(userId, { buffer, fileName, mimeType, checksumSha256, documentType, parentDocumentId }) {
   const profileId = await profileService.requireOwnedProfileId(userId);
+  const validated = await validateUploadedFile({ buffer, fileName, mimeType });
 
-  const existing = await documentRepository.findOwned(documentId, profileId);
-  if (!existing) {
-    throw new AppError(404, 'DOCUMENT_NOT_FOUND', 'Document not found');
+  if (checksumSha256 !== undefined && checksumSha256 !== null && checksumSha256 !== validated.checksumSha256) {
+    throw new AppError(400, 'CHECKSUM_MISMATCH', 'Provided checksum does not match file contents');
   }
 
+  let stored;
+  try {
+    stored = await storageProvider.store(buffer, { extension: validated.extension });
+  } catch (err) {
+    throw new AppError(500, 'STORAGE_ERROR', 'Document storage failed');
+  }
+
+  let document;
+  try {
+    document = await withTransaction(async (client) => {
+      let versionNumber = 1;
+      if (parentDocumentId) {
+        const parent = await documentRepository.findOwnedForUpdate(parentDocumentId, profileId, client);
+        if (!parent) throw new AppError(404, 'PARENT_DOCUMENT_NOT_FOUND', 'Parent document not found');
+        versionNumber = parent.version_number + 1;
+      }
+      return documentRepository.create(profileId, {
+        fileName: validated.fileName,
+        objectKey: stored.objectKey,
+        mimeType: validated.mimeType,
+        fileSizeBytes: validated.fileSizeBytes,
+        checksumSha256: validated.checksumSha256,
+        documentType,
+        parentDocumentId,
+        versionNumber,
+      }, client);
+    });
+  } catch (err) {
+    await storageProvider.delete(stored.objectKey).catch(() => {});
+    throw err;
+  }
+
+  try {
+    const processed = await documentProcessor.process(buffer, validated.mimeType, validated.extension);
+    const updated = await documentRepository.updateProcessing(document.document_id, profileId, {
+      scanStatus: 'clean',
+      rawText: processed.rawText,
+      parseabilityScore: processed.parseabilityScore,
+    });
+    if (!updated) throw new AppError(404, 'DOCUMENT_NOT_FOUND', 'Document not found');
+    return toPublicDocument(updated);
+  } catch (err) {
+    try {
+      const failed = await documentRepository.updateProcessing(document.document_id, profileId, {
+        scanStatus: 'failed',
+        rawText: null,
+        parseabilityScore: null,
+      });
+      if (failed) return toPublicDocument(failed);
+    } catch (persistErr) {
+      console.error('Failed to persist document processing failure:', persistErr.message);
+    }
+    if (err instanceof AppError) throw err;
+    throw new AppError(422, 'DOCUMENT_PROCESSING_FAILED', 'Document processing failed');
+  }
+}
+
+async function updateDocument(userId, documentId, fields) {
+  const profileId = await profileService.requireOwnedProfileId(userId);
+  const existing = await documentRepository.findOwned(documentId, profileId);
+  if (!existing) throw new AppError(404, 'DOCUMENT_NOT_FOUND', 'Document not found');
   const updated = await documentRepository.updateOwned(documentId, profileId, fields);
   return toPublicDocument(updated);
 }
 
 async function deleteDocument(userId, documentId) {
   const profileId = await profileService.requireOwnedProfileId(userId);
-
   try {
     const deleted = await documentRepository.deleteOwned(documentId, profileId);
-    if (!deleted) {
-      throw new AppError(404, 'DOCUMENT_NOT_FOUND', 'Document not found');
+    if (!deleted) throw new AppError(404, 'DOCUMENT_NOT_FOUND', 'Document not found');
+    try {
+      await storageProvider.delete(deleted.object_key);
+    } catch (storageErr) {
+      console.error('Stored document could not be removed:', storageErr.message);
     }
   } catch (err) {
-    // 23503 = foreign_key_violation. The only FK that can block a
-    // document delete is a newer version's parent_document_id still
-    // pointing at it (ON DELETE RESTRICT, by design - see the
-    // migration comment). Report that plainly instead of a raw
-    // constraint-name error.
     if (err.code === '23503') {
-      throw new AppError(
-        409,
-        'DOCUMENT_HAS_NEWER_VERSIONS',
-        'Cannot delete a document that is the parent of a newer version'
-      );
+      throw new AppError(409, 'DOCUMENT_HAS_NEWER_VERSIONS', 'Cannot delete a document that is the parent of a newer version');
     }
     throw err;
   }
@@ -119,6 +153,7 @@ module.exports = {
   listDocuments,
   getDocument,
   createDocument,
+  uploadDocument,
   updateDocument,
   deleteDocument,
 };
