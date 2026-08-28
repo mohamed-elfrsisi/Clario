@@ -14,7 +14,7 @@ async function getUserCount(req, res) {
 }
 
 async function getUserByEmail(req, res) {
-  const { email } = req.query;
+  const { email } = req.validatedQuery;
   const user = await userService.getUserByEmail(email);
 
   if (!user) {

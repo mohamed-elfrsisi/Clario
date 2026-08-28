@@ -8,6 +8,12 @@ const cors = require("cors");
 const { testConnection } = require("./config/database");
 const userRoutes = require("./routes/user.routes");
 const authRoutes = require("./routes/auth.routes");
+const profileRoutes = require("./routes/profile.routes");
+const skillRoutes = require("./routes/skill.routes");
+const experienceRoutes = require("./routes/experience.routes");
+const educationRoutes = require("./routes/education.routes");
+const documentRoutes = require("./routes/document.routes");
+const projectRoutes = require("./routes/project.routes");
 const AppError = require("./errors/app-error");
 const errorHandler = require("./middleware/error.middleware");
 
@@ -71,6 +77,23 @@ app.use("/api/auth", authRoutes);
 
 // User routes.
 app.use("/api/db/users", userRoutes);
+
+// Profile routes (includes profile-scoped /me/skills sub-resource).
+app.use("/api/profiles", profileRoutes);
+
+// Shared skills reference list.
+app.use("/api/skills", skillRoutes);
+
+// Experiences (work history) and their skill relationships.
+app.use("/api/experiences", experienceRoutes);
+app.use("/api/projects", projectRoutes);
+
+// Education history.
+app.use("/api/educations", educationRoutes);
+
+// Document metadata (no object storage integration exists yet - see
+// document.service.js for the exact scope of what this covers).
+app.use("/api/documents", documentRoutes);
 
 // Database health check. It deliberately converts the low-level
 // connectivity failure into an AppError so the central error handler

@@ -47,7 +47,28 @@ async function testConnection() {
   }
 }
 
+// Runs `fn` inside a single PostgreSQL transaction using one dedicated
+// client from the pool. `fn` receives that client and MUST use it
+// (not the shared pool) for every query, so all statements run on the
+// same connection/transaction. Commits on success, rolls back and
+// rethrows on any error. Always releases the client back to the pool.
+async function withTransaction(fn) {
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    const result = await fn(client);
+    await client.query("COMMIT");
+    return result;
+  } catch (err) {
+    await client.query("ROLLBACK");
+    throw err;
+  } finally {
+    client.release();
+  }
+}
+
 module.exports = {
   pool,
   testConnection,
+  withTransaction,
 };

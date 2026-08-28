@@ -55,12 +55,12 @@ describe("GET /api/db/users/by-email", () => {
     const res = await request(app)
       .get("/api/db/users/by-email")
       .set("Cookie", authCookie)
-      .query({ email: "mohamed.test@clario.local" });
+      .query({ email: "dev.seed.user@clario.test" });
 
     expect(res.status).toBe(200);
     expect(res.body.user).toMatchObject({
-      email: "mohamed.test@clario.local",
-      role: "student",
+      email: "dev.seed.user@clario.test",
+      role: "user",
     });
     expect(res.body.user).not.toHaveProperty("password_hash");
   });

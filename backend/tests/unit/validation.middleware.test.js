@@ -8,6 +8,7 @@ const {
   validateUserEmailQuery,
   validateRegistration,
   validateLogin,
+  validatePaginationQuery,
 } = require("../../src/middleware/validation.middleware");
 
 function mockReqRes({ query = {}, body = {} } = {}) {
@@ -15,12 +16,18 @@ function mockReqRes({ query = {}, body = {} } = {}) {
 }
 
 describe("validateUserEmailQuery", () => {
-  test("valid email calls next() with no error and trims the value", () => {
+  test("valid email calls next() with no error and stores the trimmed value on req.validatedQuery", () => {
     const { req, res, next } = mockReqRes({ query: { email: "  user@example.com  " } });
     validateUserEmailQuery(req, res, next);
 
     expect(next).toHaveBeenCalledWith();
-    expect(req.query.email).toBe("user@example.com");
+    // PHASE 9 REGRESSION TEST: this must be req.validatedQuery, not
+    // req.query - in real Express 5, req.query is a getter that
+    // re-parses the URL on every access, so writes to req.query
+    // silently vanish before a controller can read them back. This
+    // caused real 500s on every paginated list endpoint (skills,
+    // experiences, educations, documents) until fixed.
+    expect(req.validatedQuery.email).toBe("user@example.com");
   });
 
   test("missing email calls next(AppError) with VALIDATION_ERROR / 400", () => {
@@ -111,6 +118,38 @@ describe("validateLogin", () => {
   test("missing password is rejected", () => {
     const { req, res, next } = mockReqRes({ body: { email: "a@b.com" } });
     validateLogin(req, res, next);
+
+    expect(next.mock.calls[0][0].code).toBe("VALIDATION_ERROR");
+  });
+});
+
+describe("validatePaginationQuery", () => {
+  test("defaults page=1 and limit=20 onto req.validatedQuery when neither is provided", () => {
+    const { req, res, next } = mockReqRes({ query: {} });
+    validatePaginationQuery(req, res, next);
+
+    expect(next).toHaveBeenCalledWith();
+    expect(req.validatedQuery).toEqual({ page: 1, limit: 20 });
+  });
+
+  test("parses and stores valid page/limit query strings as numbers", () => {
+    const { req, res, next } = mockReqRes({ query: { page: "3", limit: "50" } });
+    validatePaginationQuery(req, res, next);
+
+    expect(next).toHaveBeenCalledWith();
+    expect(req.validatedQuery).toEqual({ page: 3, limit: 50 });
+  });
+
+  test("rejects a limit above 100", () => {
+    const { req, res, next } = mockReqRes({ query: { limit: "500" } });
+    validatePaginationQuery(req, res, next);
+
+    expect(next.mock.calls[0][0].code).toBe("VALIDATION_ERROR");
+  });
+
+  test("rejects a non-integer page", () => {
+    const { req, res, next } = mockReqRes({ query: { page: "abc" } });
+    validatePaginationQuery(req, res, next);
 
     expect(next.mock.calls[0][0].code).toBe("VALIDATION_ERROR");
   });
