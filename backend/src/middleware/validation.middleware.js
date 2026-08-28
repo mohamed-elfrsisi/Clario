@@ -363,6 +363,88 @@ function validateEducationIdParam(req, res, next) {
   validateUuidParam('educationId')(req, res, next);
 }
 
+// --- Certifications -----------------------------------------------------
+
+function validateCertificationIdParam(req, res, next) {
+  validateUuidParam('certificationId')(req, res, next);
+}
+
+function validateCreateCertification(req, res, next) {
+  const { name, issuingOrganization, issueDate, expirationDate, credentialId } = req.body || {};
+
+  if (!isNonEmptyTrimmedString(name, 255)) {
+    return next(new AppError(400, 'VALIDATION_ERROR', 'name is required (max 255 characters)'));
+  }
+
+  if (
+    issuingOrganization !== undefined &&
+    issuingOrganization !== null &&
+    !isNonEmptyTrimmedString(issuingOrganization, 255)
+  ) {
+    return next(
+      new AppError(400, 'VALIDATION_ERROR', 'issuingOrganization must be a non-empty string of at most 255 characters, or null')
+    );
+  }
+
+  if (issueDate !== undefined && issueDate !== null && !isValidDateString(issueDate)) {
+    return next(new AppError(400, 'VALIDATION_ERROR', 'issueDate must be an ISO date (YYYY-MM-DD) or null'));
+  }
+
+  if (expirationDate !== undefined && expirationDate !== null && !isValidDateString(expirationDate)) {
+    return next(new AppError(400, 'VALIDATION_ERROR', 'expirationDate must be an ISO date (YYYY-MM-DD) or null'));
+  }
+
+  if (
+    credentialId !== undefined &&
+    credentialId !== null &&
+    !isNonEmptyTrimmedString(credentialId, 255)
+  ) {
+    return next(
+      new AppError(400, 'VALIDATION_ERROR', 'credentialId must be a non-empty string of at most 255 characters, or null')
+    );
+  }
+
+  next();
+}
+
+function validateUpdateCertification(req, res, next) {
+  const { name, issuingOrganization, issueDate, expirationDate, credentialId } = req.body || {};
+
+  if (name !== undefined && !isNonEmptyTrimmedString(name, 255)) {
+    return next(new AppError(400, 'VALIDATION_ERROR', 'name must be a non-empty string of at most 255 characters'));
+  }
+
+  if (
+    issuingOrganization !== undefined &&
+    issuingOrganization !== null &&
+    !isNonEmptyTrimmedString(issuingOrganization, 255)
+  ) {
+    return next(
+      new AppError(400, 'VALIDATION_ERROR', 'issuingOrganization must be a non-empty string of at most 255 characters, or null')
+    );
+  }
+
+  if (issueDate !== undefined && issueDate !== null && !isValidDateString(issueDate)) {
+    return next(new AppError(400, 'VALIDATION_ERROR', 'issueDate must be an ISO date (YYYY-MM-DD) or null'));
+  }
+
+  if (expirationDate !== undefined && expirationDate !== null && !isValidDateString(expirationDate)) {
+    return next(new AppError(400, 'VALIDATION_ERROR', 'expirationDate must be an ISO date (YYYY-MM-DD) or null'));
+  }
+
+  if (
+    credentialId !== undefined &&
+    credentialId !== null &&
+    !isNonEmptyTrimmedString(credentialId, 255)
+  ) {
+    return next(
+      new AppError(400, 'VALIDATION_ERROR', 'credentialId must be a non-empty string of at most 255 characters, or null')
+    );
+  }
+
+  next();
+}
+
 // --- Projects ------------------------------------------------------------
 
 const MAX_URL_LENGTH = 2048;
@@ -534,6 +616,9 @@ module.exports = {
   validateEducationIdParam,
   validateCreateEducation,
   validateUpdateEducation,
+  validateCertificationIdParam,
+  validateCreateCertification,
+  validateUpdateCertification,
   validateDocumentIdParam,
   validateCreateDocument,
   validateUpdateDocument,

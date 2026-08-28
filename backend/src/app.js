@@ -12,6 +12,7 @@ const profileRoutes = require("./routes/profile.routes");
 const skillRoutes = require("./routes/skill.routes");
 const experienceRoutes = require("./routes/experience.routes");
 const educationRoutes = require("./routes/education.routes");
+const certificationRoutes = require("./routes/certification.routes");
 const documentRoutes = require("./routes/document.routes");
 const projectRoutes = require("./routes/project.routes");
 const AppError = require("./errors/app-error");
@@ -90,6 +91,9 @@ app.use("/api/projects", projectRoutes);
 
 // Education history.
 app.use("/api/educations", educationRoutes);
+
+// Professional certifications.
+app.use("/api/certifications", certificationRoutes);
 
 // Document metadata (no object storage integration exists yet - see
 // document.service.js for the exact scope of what this covers).
