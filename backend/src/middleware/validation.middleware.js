@@ -532,6 +532,100 @@ function validateUpdateProject(req, res, next) {
   next();
 }
 
+// --- Career Targets -------------------------------------------------
+
+function validateCareerTargetIdParam(req, res, next) {
+  validateUuidParam('careerTargetId')(req, res, next);
+}
+
+function validateCreateCareerTarget(req, res, next) {
+  const { targetRole, targetIndustry, targetLevel, targetRegion, timeframe, additionalNotes } =
+    req.body || {};
+
+  if (!isNonEmptyTrimmedString(targetRole, 255)) {
+    return next(new AppError(400, 'VALIDATION_ERROR', 'targetRole is required (max 255 characters)'));
+  }
+
+  for (const [key, value] of Object.entries({ targetIndustry, targetLevel, targetRegion, timeframe })) {
+    if (value === undefined || value === null) continue;
+    if (!isNonEmptyTrimmedString(value, 255)) {
+      return next(
+        new AppError(400, 'VALIDATION_ERROR', `${key} must be a non-empty string of at most 255 characters, or null`)
+      );
+    }
+  }
+
+  if (additionalNotes !== undefined && additionalNotes !== null && typeof additionalNotes !== 'string') {
+    return next(new AppError(400, 'VALIDATION_ERROR', 'additionalNotes must be a string or null'));
+  }
+
+  next();
+}
+
+function validateUpdateCareerTarget(req, res, next) {
+  const { targetRole, targetIndustry, targetLevel, targetRegion, timeframe, additionalNotes } =
+    req.body || {};
+
+  if (targetRole !== undefined && !isNonEmptyTrimmedString(targetRole, 255)) {
+    return next(new AppError(400, 'VALIDATION_ERROR', 'targetRole must be a non-empty string of at most 255 characters'));
+  }
+
+  for (const [key, value] of Object.entries({ targetIndustry, targetLevel, targetRegion, timeframe })) {
+    if (value === undefined || value === null) continue;
+    if (!isNonEmptyTrimmedString(value, 255)) {
+      return next(
+        new AppError(400, 'VALIDATION_ERROR', `${key} must be a non-empty string of at most 255 characters, or null`)
+      );
+    }
+  }
+
+  if (additionalNotes !== undefined && additionalNotes !== null && typeof additionalNotes !== 'string') {
+    return next(new AppError(400, 'VALIDATION_ERROR', 'additionalNotes must be a string or null'));
+  }
+
+  next();
+}
+
+const IMPORTANCE_LEVEL_MIN = 1;
+const IMPORTANCE_LEVEL_MAX = 5;
+
+function validateAddTargetSkill(req, res, next) {
+  const { skillId, skillName, importanceLevel } = req.body || {};
+
+  const hasId = skillId !== undefined;
+  const hasName = skillName !== undefined;
+
+  if (hasId === hasName) {
+    // both provided or neither provided
+    return next(
+      new AppError(400, 'VALIDATION_ERROR', 'Provide exactly one of skillId or skillName')
+    );
+  }
+
+  if (hasId && !UUID_PATTERN.test(skillId)) {
+    return next(new AppError(400, 'VALIDATION_ERROR', 'Invalid skillId'));
+  }
+
+  if (hasName && !isNonEmptyTrimmedString(skillName, 255)) {
+    return next(
+      new AppError(400, 'VALIDATION_ERROR', 'skillName must be a non-empty string of at most 255 characters')
+    );
+  }
+
+  if (
+    importanceLevel !== undefined &&
+    (!Number.isInteger(importanceLevel) ||
+      importanceLevel < IMPORTANCE_LEVEL_MIN ||
+      importanceLevel > IMPORTANCE_LEVEL_MAX)
+  ) {
+    return next(
+      new AppError(400, 'VALIDATION_ERROR', `importanceLevel must be an integer between ${IMPORTANCE_LEVEL_MIN} and ${IMPORTANCE_LEVEL_MAX}`)
+    );
+  }
+
+  next();
+}
+
 // --- Documents ----------------------------------------------------------
 //
 // Metadata only - see document.service.js for why. object_key,
@@ -619,6 +713,10 @@ module.exports = {
   validateCertificationIdParam,
   validateCreateCertification,
   validateUpdateCertification,
+  validateCareerTargetIdParam,
+  validateCreateCareerTarget,
+  validateUpdateCareerTarget,
+  validateAddTargetSkill,
   validateDocumentIdParam,
   validateCreateDocument,
   validateUpdateDocument,
