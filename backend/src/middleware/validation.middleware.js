@@ -695,6 +695,117 @@ function validateUpdateDocument(req, res, next) {
   next();
 }
 
+// --- Analyses ---------------------------------------------------------
+
+function validateAnalysisIdParam(req, res, next) {
+  validateUuidParam('analysisId')(req, res, next);
+}
+
+function validateCreateAnalysis(req, res, next) {
+  const { documentId, opportunityId } = req.body || {};
+
+  if (!UUID_PATTERN.test(documentId)) {
+    return next(new AppError(400, 'VALIDATION_ERROR', 'documentId is required and must be a valid UUID'));
+  }
+
+  if (!UUID_PATTERN.test(opportunityId)) {
+    return next(new AppError(400, 'VALIDATION_ERROR', 'opportunityId is required and must be a valid UUID'));
+  }
+
+  next();
+}
+
+// --- Skill Gaps ---------------------------------------------------------
+
+function validateSkillGapIdParam(req, res, next) {
+  validateUuidParam('skillGapId')(req, res, next);
+}
+
+const LEVEL_MIN = 0;
+const LEVEL_MAX = 5;
+const PRIORITY_MIN = 1;
+const PRIORITY_MAX = 5;
+
+function isValidLevel(value, min, max) {
+  return Number.isInteger(value) && value >= min && value <= max;
+}
+
+function validateCreateSkillGap(req, res, next) {
+  const { skillId, currentLevel, requiredLevel, priorityLevel, notes } = req.body || {};
+
+  if (!UUID_PATTERN.test(skillId)) {
+    return next(new AppError(400, 'VALIDATION_ERROR', 'skillId is required and must be a valid UUID'));
+  }
+
+  if (currentLevel !== undefined && !isValidLevel(currentLevel, LEVEL_MIN, LEVEL_MAX)) {
+    return next(
+      new AppError(400, 'VALIDATION_ERROR', `currentLevel must be an integer between ${LEVEL_MIN} and ${LEVEL_MAX}`)
+    );
+  }
+
+  if (requiredLevel !== undefined && !isValidLevel(requiredLevel, LEVEL_MIN, LEVEL_MAX)) {
+    return next(
+      new AppError(400, 'VALIDATION_ERROR', `requiredLevel must be an integer between ${LEVEL_MIN} and ${LEVEL_MAX}`)
+    );
+  }
+
+  if (priorityLevel !== undefined && !isValidLevel(priorityLevel, PRIORITY_MIN, PRIORITY_MAX)) {
+    return next(
+      new AppError(400, 'VALIDATION_ERROR', `priorityLevel must be an integer between ${PRIORITY_MIN} and ${PRIORITY_MAX}`)
+    );
+  }
+
+  if (notes !== undefined && notes !== null && typeof notes !== 'string') {
+    return next(new AppError(400, 'VALIDATION_ERROR', 'notes must be a string or null'));
+  }
+
+  next();
+}
+
+function validateUpdateSkillGap(req, res, next) {
+  const { currentLevel, requiredLevel, priorityLevel, notes } = req.body || {};
+
+  if (currentLevel !== undefined && !isValidLevel(currentLevel, LEVEL_MIN, LEVEL_MAX)) {
+    return next(
+      new AppError(400, 'VALIDATION_ERROR', `currentLevel must be an integer between ${LEVEL_MIN} and ${LEVEL_MAX}`)
+    );
+  }
+
+  if (requiredLevel !== undefined && !isValidLevel(requiredLevel, LEVEL_MIN, LEVEL_MAX)) {
+    return next(
+      new AppError(400, 'VALIDATION_ERROR', `requiredLevel must be an integer between ${LEVEL_MIN} and ${LEVEL_MAX}`)
+    );
+  }
+
+  if (priorityLevel !== undefined && !isValidLevel(priorityLevel, PRIORITY_MIN, PRIORITY_MAX)) {
+    return next(
+      new AppError(400, 'VALIDATION_ERROR', `priorityLevel must be an integer between ${PRIORITY_MIN} and ${PRIORITY_MAX}`)
+    );
+  }
+
+  if (notes !== undefined && notes !== null && typeof notes !== 'string') {
+    return next(new AppError(400, 'VALIDATION_ERROR', 'notes must be a string or null'));
+  }
+
+  next();
+}
+
+// --- Career Alignments -------------------------------------------------
+
+function validateCareerAlignmentIdParam(req, res, next) {
+  validateUuidParam('careerAlignmentId')(req, res, next);
+}
+
+function validateCreateCareerAlignment(req, res, next) {
+  const { careerTargetId } = req.body || {};
+
+  if (!UUID_PATTERN.test(careerTargetId)) {
+    return next(new AppError(400, 'VALIDATION_ERROR', 'careerTargetId is required and must be a valid UUID'));
+  }
+
+  next();
+}
+
 module.exports = {
   validateUserEmailQuery,
   validateRegistration,
@@ -723,4 +834,11 @@ module.exports = {
   validateProjectIdParam,
   validateCreateProject,
   validateUpdateProject,
+  validateAnalysisIdParam,
+  validateCreateAnalysis,
+  validateSkillGapIdParam,
+  validateCreateSkillGap,
+  validateUpdateSkillGap,
+  validateCareerAlignmentIdParam,
+  validateCreateCareerAlignment,
 };

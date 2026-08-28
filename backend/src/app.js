@@ -16,6 +16,7 @@ const certificationRoutes = require("./routes/certification.routes");
 const careerTargetRoutes = require("./routes/career-target.routes");
 const documentRoutes = require("./routes/document.routes");
 const projectRoutes = require("./routes/project.routes");
+const analysisRoutes = require("./routes/analysis.routes");
 const AppError = require("./errors/app-error");
 const errorHandler = require("./middleware/error.middleware");
 
@@ -102,6 +103,11 @@ app.use("/api/career-targets", careerTargetRoutes);
 // Document metadata (no object storage integration exists yet - see
 // document.service.js for the exact scope of what this covers).
 app.use("/api/documents", documentRoutes);
+
+// Analyses (document-vs-opportunity match runs) and their skill-gap /
+// career-alignment sub-resources. No AI/analysis-generation engine
+// exists yet - see analysis.service.js for exact scope.
+app.use("/api/analyses", analysisRoutes);
 
 // Database health check. It deliberately converts the low-level
 // connectivity failure into an AppError so the central error handler
