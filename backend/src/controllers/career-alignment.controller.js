@@ -28,6 +28,16 @@ async function createCareerAlignment(req, res) {
   res.status(201).json({ careerAlignment });
 }
 
+async function updateCareerAlignment(req, res) {
+  const careerAlignment = await careerAlignmentService.updateCareerAlignment(
+    req.user.userId,
+    req.params.analysisId,
+    req.params.careerAlignmentId,
+    req.body
+  );
+  res.status(200).json({ careerAlignment });
+}
+
 async function deleteCareerAlignment(req, res) {
   await careerAlignmentService.deleteCareerAlignment(
     req.user.userId,
@@ -41,5 +51,6 @@ module.exports = {
   listCareerAlignments,
   getCareerAlignment,
   createCareerAlignment,
+  updateCareerAlignment,
   deleteCareerAlignment,
 };

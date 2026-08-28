@@ -46,6 +46,33 @@ async function create(
   return result.rows[0];
 }
 
+async function updateOwned(
+  careerAlignmentId,
+  analysisId,
+  { careerTargetId, alignmentScore, matchingFactors, missingFactors },
+  executor = pool
+) {
+  const query = `
+    UPDATE career_alignments
+    SET career_target_id = $3,
+        alignment_score = $4,
+        matching_factors = $5,
+        missing_factors = $6
+    WHERE career_alignment_id = $1 AND analysis_id = $2
+    RETURNING career_alignment_id, analysis_id, career_target_id, alignment_score,
+              matching_factors, missing_factors, created_at
+  `;
+  const result = await executor.query(query, [
+    careerAlignmentId,
+    analysisId,
+    careerTargetId,
+    alignmentScore,
+    matchingFactors,
+    missingFactors,
+  ]);
+  return result.rows[0] || null;
+}
+
 async function deleteOwned(careerAlignmentId, analysisId, executor = pool) {
   const query = `
     DELETE FROM career_alignments
@@ -60,5 +87,6 @@ module.exports = {
   listForAnalysis,
   findOwned,
   create,
+  updateOwned,
   deleteOwned,
 };

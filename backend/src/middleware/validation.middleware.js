@@ -806,6 +806,171 @@ function validateCreateCareerAlignment(req, res, next) {
   next();
 }
 
+function validateUpdateCareerAlignment(req, res, next) {
+  const { careerTargetId } = req.body || {};
+
+  if (!UUID_PATTERN.test(careerTargetId)) {
+    return next(new AppError(400, 'VALIDATION_ERROR', 'careerTargetId is required and must be a valid UUID'));
+  }
+
+  next();
+}
+
+
+// --- Interviews -------------------------------------------------------
+
+function validateInterviewIdParam(req, res, next) {
+  validateUuidParam('interviewId')(req, res, next);
+}
+
+function validateQuestionIdParam(req, res, next) {
+  validateUuidParam('questionId')(req, res, next);
+}
+
+function validateAnswerIdParam(req, res, next) {
+  validateUuidParam('answerId')(req, res, next);
+}
+
+function validateEvaluationIdParam(req, res, next) {
+  validateUuidParam('evaluationId')(req, res, next);
+}
+
+function validateInterviewQuestionParams(req, res, next) {
+  validateUuidParam('interviewId')(req, res, (err) => {
+    if (err) return next(err);
+    validateUuidParam('questionId')(req, res, next);
+  });
+}
+
+function validateInterviewAnswerParams(req, res, next) {
+  validateUuidParam('interviewId')(req, res, (err) => {
+    if (err) return next(err);
+    validateUuidParam('questionId')(req, res, (err2) => {
+      if (err2) return next(err2);
+      validateUuidParam('answerId')(req, res, next);
+    });
+  });
+}
+
+function validateInterviewEvaluationParams(req, res, next) {
+  validateInterviewAnswerParams(req, res, (err) => {
+    if (err) return next(err);
+    validateUuidParam('evaluationId')(req, res, next);
+  });
+}
+
+function isOptionalDateTime(value) {
+  return value === null || (typeof value === 'string' && !Number.isNaN(Date.parse(value)));
+}
+
+function validateInterviewCommonFields(body, isCreate) {
+  const { interviewType, status, opportunityId, scheduledAt, startedAt, endedAt, overallScore, feedback } = body || {};
+
+  if (isCreate && !isNonEmptyTrimmedString(interviewType, 255)) {
+    return 'interviewType is required and must be a non-empty string of at most 255 characters';
+  }
+  if (interviewType !== undefined && !isNonEmptyTrimmedString(interviewType, 255)) {
+    return 'interviewType must be a non-empty string of at most 255 characters';
+  }
+  if (status !== undefined && !isNonEmptyTrimmedString(status, 32)) {
+    return 'status must be a non-empty string of at most 32 characters';
+  }
+  if (opportunityId !== undefined && opportunityId !== null && !UUID_PATTERN.test(opportunityId)) {
+    return 'opportunityId must be a valid UUID or null';
+  }
+  for (const [name, value] of Object.entries({ scheduledAt, startedAt, endedAt })) {
+    if (value !== undefined && !isOptionalDateTime(value)) return `${name} must be a valid date-time string or null`;
+  }
+  if (overallScore !== undefined && overallScore !== null &&
+      (typeof overallScore !== 'number' || !Number.isFinite(overallScore) || overallScore < 0 || overallScore > 100)) {
+    return 'overallScore must be a number between 0 and 100, or null';
+  }
+  if (feedback !== undefined && feedback !== null && typeof feedback !== 'string') {
+    return 'feedback must be a string or null';
+  }
+  return null;
+}
+
+function validateCreateInterview(req, res, next) {
+  const error = validateInterviewCommonFields(req.body || {}, true);
+  if (error) return next(new AppError(400, 'VALIDATION_ERROR', error));
+  next();
+}
+
+function validateUpdateInterview(req, res, next) {
+  const body = req.body || {};
+  if (Object.keys(body).length === 0) return next(new AppError(400, 'VALIDATION_ERROR', 'At least one field is required'));
+  const error = validateInterviewCommonFields(body, false);
+  if (error) return next(new AppError(400, 'VALIDATION_ERROR', error));
+  next();
+}
+
+function validateCreateInterviewQuestion(req, res, next) {
+  const { questionText, questionType, orderIndex } = req.body || {};
+  if (!isNonEmptyTrimmedString(questionText, 100000)) return next(new AppError(400, 'VALIDATION_ERROR', 'questionText is required and must be a non-empty string'));
+  if (!isNonEmptyTrimmedString(questionType, 255)) return next(new AppError(400, 'VALIDATION_ERROR', 'questionType is required and must be a non-empty string of at most 255 characters'));
+  if (!Number.isInteger(orderIndex) || orderIndex < 0) return next(new AppError(400, 'VALIDATION_ERROR', 'orderIndex is required and must be a non-negative integer'));
+  next();
+}
+
+function validateUpdateInterviewQuestion(req, res, next) {
+  const body = req.body || {};
+  if (Object.keys(body).length === 0) return next(new AppError(400, 'VALIDATION_ERROR', 'At least one field is required'));
+  if (body.questionText !== undefined && !isNonEmptyTrimmedString(body.questionText, 100000)) return next(new AppError(400, 'VALIDATION_ERROR', 'questionText must be a non-empty string'));
+  if (body.questionType !== undefined && !isNonEmptyTrimmedString(body.questionType, 255)) return next(new AppError(400, 'VALIDATION_ERROR', 'questionType must be a non-empty string of at most 255 characters'));
+  if (body.orderIndex !== undefined && (!Number.isInteger(body.orderIndex) || body.orderIndex < 0)) return next(new AppError(400, 'VALIDATION_ERROR', 'orderIndex must be a non-negative integer'));
+  next();
+}
+
+function validateAnswerFields(req, isCreate) {
+  const body = req.body || {};
+  const { answerText, answerType, answeredAt } = body;
+  if (isCreate && answerText === undefined && answerType === undefined && answeredAt === undefined) {
+    return 'At least one answer field is required';
+  }
+  if (answerText !== undefined && answerText !== null && typeof answerText !== 'string') return 'answerText must be a string or null';
+  if (answerType !== undefined && answerType !== null && !isNonEmptyTrimmedString(answerType, 255)) return 'answerType must be a non-empty string of at most 255 characters, or null';
+  if (answeredAt !== undefined && !isOptionalDateTime(answeredAt)) return 'answeredAt must be a valid date-time string or null';
+  return null;
+}
+
+function validateCreateInterviewAnswer(req, res, next) {
+  const error = validateAnswerFields(req, true);
+  if (error) return next(new AppError(400, 'VALIDATION_ERROR', error));
+  next();
+}
+
+function validateUpdateInterviewAnswer(req, res, next) {
+  const body = req.body || {};
+  if (Object.keys(body).length === 0) return next(new AppError(400, 'VALIDATION_ERROR', 'At least one field is required'));
+  const error = validateAnswerFields(req, false);
+  if (error) return next(new AppError(400, 'VALIDATION_ERROR', error));
+  next();
+}
+
+function validateEvaluationFields(req, isCreate) {
+  const body = req.body || {};
+  const { score, feedback, evaluatedAt } = body;
+  if (isCreate && (typeof score !== 'number' || !Number.isFinite(score))) return 'score is required and must be a number';
+  if (score !== undefined && (typeof score !== 'number' || !Number.isFinite(score) || score < 0 || score > 100)) return 'score must be a number between 0 and 100';
+  if (feedback !== undefined && feedback !== null && typeof feedback !== 'string') return 'feedback must be a string or null';
+  if (evaluatedAt !== undefined && !(typeof evaluatedAt === 'string' && !Number.isNaN(Date.parse(evaluatedAt)))) return 'evaluatedAt must be a valid date-time string';
+  return null;
+}
+
+function validateCreateInterviewEvaluation(req, res, next) {
+  const error = validateEvaluationFields(req, true);
+  if (error) return next(new AppError(400, 'VALIDATION_ERROR', error));
+  next();
+}
+
+function validateUpdateInterviewEvaluation(req, res, next) {
+  if (Object.keys(req.body || {}).length === 0) return next(new AppError(400, 'VALIDATION_ERROR', 'At least one field is required'));
+  const error = validateEvaluationFields(req, false);
+  if (error) return next(new AppError(400, 'VALIDATION_ERROR', error));
+  next();
+}
+
 module.exports = {
   validateUserEmailQuery,
   validateRegistration,
@@ -841,4 +1006,20 @@ module.exports = {
   validateUpdateSkillGap,
   validateCareerAlignmentIdParam,
   validateCreateCareerAlignment,
+  validateUpdateCareerAlignment,
+  validateInterviewIdParam,
+  validateQuestionIdParam,
+  validateAnswerIdParam,
+  validateEvaluationIdParam,
+  validateInterviewQuestionParams,
+  validateInterviewAnswerParams,
+  validateInterviewEvaluationParams,
+  validateCreateInterview,
+  validateUpdateInterview,
+  validateCreateInterviewQuestion,
+  validateUpdateInterviewQuestion,
+  validateCreateInterviewAnswer,
+  validateUpdateInterviewAnswer,
+  validateCreateInterviewEvaluation,
+  validateUpdateInterviewEvaluation,
 };
