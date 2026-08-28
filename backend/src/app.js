@@ -18,6 +18,7 @@ const documentRoutes = require("./routes/document.routes");
 const projectRoutes = require("./routes/project.routes");
 const analysisRoutes = require("./routes/analysis.routes");
 const interviewRoutes = require("./routes/interview.routes");
+const opportunityRoutes = require("./routes/opportunity.routes");
 const AppError = require("./errors/app-error");
 const errorHandler = require("./middleware/error.middleware");
 
@@ -112,6 +113,9 @@ app.use("/api/analyses", analysisRoutes);
 
 // Interviews and their question/answer/evaluation child resources.
 app.use("/api/interviews", interviewRoutes);
+
+// Shared opportunity reference data. Opportunities are not user-owned in the schema.
+app.use("/api/opportunities", opportunityRoutes);
 
 // Database health check. It deliberately converts the low-level
 // connectivity failure into an AppError so the central error handler

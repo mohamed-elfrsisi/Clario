@@ -1007,6 +1007,92 @@ function validateUpdateInterviewEvaluation(req, res, next) {
   next();
 }
 
+// --- Opportunities -------------------------------------------------------
+
+function validateOpportunityIdParam(req, res, next) {
+  validateUuidParam('opportunityId')(req, res, next);
+}
+
+const OPPORTUNITY_TEXT_FIELDS = {
+  title: 255,
+  organization: 255,
+  region: 255,
+  roleType: 255,
+};
+
+function validateOpportunityFields(req, isCreate) {
+  const body = req.body || {};
+  const allowed = ['title', 'organization', 'description', 'jobUrl', 'region', 'roleType'];
+
+  for (const key of Object.keys(body)) {
+    if (!allowed.includes(key)) return `${key} is not a supported field`;
+  }
+
+  if (isCreate && !isNonEmptyTrimmedString(body.title, 255)) {
+    return 'title is required (max 255 characters)';
+  }
+
+  if (!isCreate && body.title !== undefined && !isNonEmptyTrimmedString(body.title, 255)) {
+    return 'title must be a non-empty string of at most 255 characters';
+  }
+
+  for (const [key, max] of Object.entries(OPPORTUNITY_TEXT_FIELDS)) {
+    if (key === 'title' || body[key] === undefined || body[key] === null) continue;
+    if (!isNonEmptyTrimmedString(body[key], max)) {
+      return `${key} must be a non-empty string of at most ${max} characters, or null`;
+    }
+  }
+
+  for (const key of ['description', 'jobUrl']) {
+    if (body[key] !== undefined && body[key] !== null && typeof body[key] !== 'string') {
+      return `${key} must be a string or null`;
+    }
+  }
+
+  if (!isCreate && Object.keys(body).length === 0) return 'At least one field is required';
+  return null;
+}
+
+function validateCreateOpportunity(req, res, next) {
+  const error = validateOpportunityFields(req, true);
+  if (error) return next(new AppError(400, 'VALIDATION_ERROR', error));
+  next();
+}
+
+function validateUpdateOpportunity(req, res, next) {
+  const error = validateOpportunityFields(req, false);
+  if (error) return next(new AppError(400, 'VALIDATION_ERROR', error));
+  next();
+}
+
+function validateAddOpportunitySkill(req, res, next) {
+  const body = req.body || {};
+  const { skillId, skillName, importanceLevel } = body;
+  const keys = Object.keys(body);
+  const allowed = ['skillId', 'skillName', 'importanceLevel'];
+  if (keys.some((key) => !allowed.includes(key))) {
+    return next(new AppError(400, 'VALIDATION_ERROR', 'Unsupported skill association field'));
+  }
+
+  const hasId = skillId !== undefined;
+  const hasName = skillName !== undefined;
+  if (hasId === hasName) {
+    return next(new AppError(400, 'VALIDATION_ERROR', 'Provide exactly one of skillId or skillName'));
+  }
+  if (hasId && !UUID_PATTERN.test(skillId)) {
+    return next(new AppError(400, 'VALIDATION_ERROR', 'Invalid skillId'));
+  }
+  if (hasName && !isNonEmptyTrimmedString(skillName, 255)) {
+    return next(new AppError(400, 'VALIDATION_ERROR', 'skillName must be a non-empty string of at most 255 characters'));
+  }
+  if (importanceLevel !== undefined &&
+      (!Number.isInteger(importanceLevel) || importanceLevel < 1 || importanceLevel > 5)) {
+    return next(new AppError(400, 'VALIDATION_ERROR', 'importanceLevel must be an integer between 1 and 5'));
+  }
+  next();
+}
+
+
 module.exports = {
   validateUserEmailQuery,
   validateRegistration,
@@ -1059,4 +1145,8 @@ module.exports = {
   validateUpdateInterviewAnswer,
   validateCreateInterviewEvaluation,
   validateUpdateInterviewEvaluation,
+  validateOpportunityIdParam,
+  validateCreateOpportunity,
+  validateUpdateOpportunity,
+  validateAddOpportunitySkill,
 };
